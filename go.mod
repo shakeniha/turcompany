@@ -1,4 +1,4 @@
-module clean_mobile_app
+module turcompany
 
 go 1.23
 
