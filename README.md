@@ -1,8 +1,5 @@
-# Clean Mobile App (Golang)
+# Tour Company
 
-A clean architecture template for a mobile application backend using **Go 1.23**. This repository provides a structured approach to build scalable and maintainable backend systems.
-
----
 
 ## 📂 Project Structure
 
