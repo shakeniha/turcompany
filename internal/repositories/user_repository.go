@@ -1,0 +1,111 @@
+package repositories
+
+import (
+	"database/sql"
+
+	"turcompany/internal/models"
+)
+
+type UserRepository interface {
+	Create(user *models.User) error
+	GetByID(id int) (*models.User, error)
+	Update(user *models.User) error
+	Delete(id int) error
+	List() ([]*models.User, error)
+}
+
+type userRepository struct {
+	DB *sql.DB
+}
+
+func NewUserRepository(db *sql.DB) UserRepository {
+	return &userRepository{DB: db}
+}
+
+func (r *userRepository) Create(user *models.User) error {
+	query := `
+		INSERT INTO users (company_name, bin_iin, email, password_hash, role_id, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		RETURNING id
+	`
+
+	return r.DB.QueryRow(query,
+		user.CompanyName,
+		user.BinIin,
+		user.Email,
+		user.PasswordHash,
+		user.RoleID,
+	).Scan(&user.ID)
+}
+
+func (r *userRepository) GetByID(id int) (*models.User, error) {
+	query := `
+		SELECT id, company_name, bin_iin, email, role_id, created_at, updated_at
+		FROM users
+		WHERE id = $1
+	`
+	user := &models.User{}
+	err := r.DB.QueryRow(query, id).Scan(
+		&user.ID,
+		&user.CompanyName,
+		&user.BinIin,
+		&user.Email,
+		&user.RoleID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (r *userRepository) Update(user *models.User) error {
+	query := `
+		UPDATE users
+		SET company_name = $1, bin_iin = $2, email = $3, role_id = $4, updated_at = $5
+		WHERE id = $6
+	`
+	_, err := r.DB.Exec(query,
+		user.CompanyName,
+		user.BinIin,
+		user.Email,
+		user.RoleID,
+		user.ID,
+	)
+	return err
+}
+
+func (r *userRepository) Delete(id int) error {
+	query := `DELETE FROM users WHERE id = $1`
+	_, err := r.DB.Exec(query, id)
+	return err
+}
+
+func (r *userRepository) List() ([]*models.User, error) {
+	query := `
+		SELECT id, company_name, bin_iin, email, role_id, created_at, updated_at
+		FROM users
+		ORDER BY id
+	`
+
+	rows, err := r.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*models.User
+	for rows.Next() {
+		u := &models.User{}
+		if err := rows.Scan(
+			&u.ID,
+			&u.CompanyName,
+			&u.BinIin,
+			&u.Email,
+			&u.RoleID,
+		); err != nil {
+			return nil, err
+		}
+		users = append(users, u)
+	}
+	return users, nil
+}
