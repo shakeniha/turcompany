@@ -42,8 +42,8 @@ clean_mobile_app/
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/ZhumabekovAlim/clean_mobile_app.git
-   cd clean_mobile_app
+   git clone https://github.com/shakeniha/turcompany.git
+   cd turcompany
    ```
 
 2. **Install dependencies**:
