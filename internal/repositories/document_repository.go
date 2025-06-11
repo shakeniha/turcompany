@@ -1,57 +1,86 @@
 package repositories
 
 import (
-    "database/sql"
-    "fmt"
-    "turcompany/internal/models"
+	"database/sql"
+	"fmt"
+	"turcompany/internal/models"
 )
 
 type DocumentRepository struct {
-    DB *sql.DB
+	DB *sql.DB
 }
 
 func NewDocumentRepository(db *sql.DB) *DocumentRepository {
-    return &DocumentRepository{DB: db}
+	return &DocumentRepository{DB: db}
 }
 
 func (r *DocumentRepository) Create(doc *models.Document) (int64, error) {
-    query := `INSERT INTO documents (deal_id, doc_type, file_path, status, signed_at)
+	query := `INSERT INTO documents (deal_id, doc_type, file_path, status, signed_at)
               VALUES ($1, $2, $3, $4, $5) RETURNING id`
-    err := r.DB.QueryRow(query, doc.DealID, doc.DocType, doc.FilePath, doc.Status, doc.SignedAt).Scan(&doc.ID)
-    if err != nil {
-        return 0, fmt.Errorf("create document: %w", err)
-    }
-    return doc.ID, nil
+	err := r.DB.QueryRow(query, doc.DealID, doc.DocType, doc.FilePath, doc.Status, doc.SignedAt).Scan(&doc.ID)
+	if err != nil {
+		return 0, fmt.Errorf("create document: %w", err)
+	}
+	return doc.ID, nil
 }
 
 func (r *DocumentRepository) GetByID(id int64) (*models.Document, error) {
-    query := `SELECT id, deal_id, doc_type, file_path, status, signed_at FROM documents WHERE id = $1`
-    row := r.DB.QueryRow(query, id)
-    var doc models.Document
-    err := row.Scan(&doc.ID, &doc.DealID, &doc.DocType, &doc.FilePath, &doc.Status, &doc.SignedAt)
-    if err != nil {
-        if err == sql.ErrNoRows {
-            return nil, nil
-        }
-        return nil, fmt.Errorf("get document: %w", err)
-    }
-    return &doc, nil
+	query := `SELECT id, deal_id, doc_type, file_path, status, signed_at FROM documents WHERE id = $1`
+	row := r.DB.QueryRow(query, id)
+	var doc models.Document
+	err := row.Scan(&doc.ID, &doc.DealID, &doc.DocType, &doc.FilePath, &doc.Status, &doc.SignedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("get document: %w", err)
+	}
+	return &doc, nil
 }
 
 func (r *DocumentRepository) Update(doc *models.Document) error {
-    query := `UPDATE documents SET deal_id=$1, doc_type=$2, file_path=$3, status=$4, signed_at=$5 WHERE id=$6`
-    _, err := r.DB.Exec(query, doc.DealID, doc.DocType, doc.FilePath, doc.Status, doc.SignedAt, doc.ID)
-    if err != nil {
-        return fmt.Errorf("update document: %w", err)
-    }
-    return nil
+	query := `UPDATE documents SET deal_id=$1, doc_type=$2, file_path=$3, status=$4, signed_at=$5 WHERE id=$6`
+	_, err := r.DB.Exec(query, doc.DealID, doc.DocType, doc.FilePath, doc.Status, doc.SignedAt, doc.ID)
+	if err != nil {
+		return fmt.Errorf("update document: %w", err)
+	}
+	return nil
 }
 
 func (r *DocumentRepository) Delete(id int64) error {
-    query := `DELETE FROM documents WHERE id = $1`
-    _, err := r.DB.Exec(query, id)
-    if err != nil {
-        return fmt.Errorf("delete document: %w", err)
-    }
-    return nil
+	query := `DELETE FROM documents WHERE id = $1`
+	_, err := r.DB.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("delete document: %w", err)
+	}
+	return nil
+}
+
+func (r *DocumentRepository) ListDocumentsByDeal(dealID int64) ([]*models.Document, error) {
+	query := `SELECT id, deal_id, doc_type, file_path, status, signed_at FROM documents WHERE deal_id = $1`
+	rows, err := r.DB.Query(query, dealID)
+	if err != nil {
+		return nil, fmt.Errorf("get by deal: %w", err)
+	}
+	defer rows.Close()
+
+	var docs []*models.Document
+	for rows.Next() {
+		var doc models.Document
+		err := rows.Scan(&doc.ID, &doc.DealID, &doc.DocType, &doc.FilePath, &doc.Status, &doc.SignedAt)
+		if err != nil {
+			return nil, err
+		}
+		docs = append(docs, &doc)
+	}
+	return docs, nil
+}
+
+func (r *DocumentRepository) UpdateStatus(id int64, status string) error {
+	query := `UPDATE documents SET status = $1 WHERE id = $2`
+	_, err := r.DB.Exec(query, status, id)
+	if err != nil {
+		return fmt.Errorf("update status: %w", err)
+	}
+	return nil
 }
