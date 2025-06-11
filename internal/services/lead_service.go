@@ -11,6 +11,9 @@ func NewLeadService(repo *repositories.LeadRepository) *LeadService {
 	return &LeadService{Repo: repo}
 }
 func (s *LeadService) Create(lead *models.Leads) error {
+	if lead.Status ==""{
+		lead.Status = "new"
+	}
 	return s.Repo.Create(lead)
 }
 func (s *LeadService) Update(lead *models.Leads) error {

@@ -1,5 +1,7 @@
 package services
 import(
+	"errors"
+	"strings"
 	"turcompany/internal/models"
 	"turcompany/internal/repositories"
 )
@@ -7,12 +9,20 @@ import(
 type DealService struct {
 	Repo *repositories.DealRepository
 }
-func NewDealService(repo *repositories.DealRepository)*DealService {
-	return &DealService{Repo : repo}
+func NewDealService(repo *repositories.DealRepository) *DealService {
+	return &DealService{Repo: repo}
 }
+
 func (s *DealService) Create(deal *models.Deals) error {
+	if strings.HasPrefix(deal.Amount.Value, "-") {
+		return errors.New("deal amount cannot be negative")
+	}
+	if deal.Status == ""{
+		deal.Status ="new"
+	}
 	return s.Repo.Create(deal)
 }
+
 func (s *DealService) Update(deal *models.Deals)error{
 	return s.Repo.Update(deal)
 }
