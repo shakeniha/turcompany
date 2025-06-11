@@ -10,6 +10,7 @@ type RoleRepository interface {
 	GetByName(name string) (*models.Role, error)
 	List() ([]*models.Role, error)
 	Create(role *models.Role) error
+	Update(role *models.Role) error
 	Delete(id int) error
 }
 
@@ -67,6 +68,12 @@ func (r *roleRepository) Create(role *models.Role) error {
 		RETURNING id
 	`
 	return r.DB.QueryRow(query, role.Name, role.Description).Scan(&role.ID)
+}
+
+func (r *roleRepository) Update(role *models.Role) error {
+	query := `UPDATE roles SET name = $1, description = $2 WHERE id = $3`
+	_, err := r.DB.Exec(query, role.Name, role.Description, role.ID)
+	return err
 }
 
 func (r *roleRepository) Delete(id int) error {
