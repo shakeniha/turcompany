@@ -7,9 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	"my-crm-project/internal/domain"
-	// Предполагаем, что у вас есть кастомный пакет для ошибок, чтобы различать их
-	// "my-crm-project/internal/domain/errs" 
+	"turcompany/internal/handlers"
+
 )
 
 // createTaskRequest определяет структуру для создания задачи.
