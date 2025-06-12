@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"strconv"
 	"turcompany/internal/models"
 	"turcompany/internal/services"
 
@@ -29,12 +30,13 @@ func (h *DealHandler) Create(c *gin.Context) {
 }
 
 func (h *DealHandler) Update(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
 	var deal models.Deals
 	if err := c.ShouldBindJSON(&deal); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
+	id, _ := strconv.Atoi(idStr)
 	deal.ID = id
 	if err := h.Service.Update(&deal); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})

@@ -7,7 +7,7 @@ toolchain go1.24.1
 require (
 	github.com/gin-gonic/gin v1.10.1
 	github.com/lib/pq v1.10.9
-	google.golang.org/genproto v0.0.0-20250603155806-513f23925822
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -36,5 +36,4 @@ require (
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.25.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
