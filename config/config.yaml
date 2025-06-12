@@ -3,4 +3,4 @@ server:
 
 database:
   driver: "postgres"
-  url: "postgres://postgres:123123@localhost:5432/postgres?sslmode=disable"
+  url: "postgres://postgres:1234@localhost:5432/postgres?sslmode=disable"

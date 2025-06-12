@@ -1,4 +1,5 @@
 package repositories
+
 import (
 	"database/sql"
 	"turcompany/internal/models"
@@ -8,17 +9,21 @@ type LeadRepository struct {
 	db *sql.DB
 }
 
-func NewLeadRepository(db *sql.DB)* LeadRepository {
-	return &LeadRepository{db:db}
+func NewLeadRepository(db *sql.DB) *LeadRepository {
+	return &LeadRepository{db: db}
 }
-func (r *LeadRepository) Create(lead *models.Leads)error{
-	query:= `INSERT INTO leads (ID,Title,Descriptin, CreateAt, OwnerID, Status,) VALUES ($1, $2, $3, $4, $5, $6)`
-	_,err :=r.db.Exec(query, lead.ID, lead.Title, lead.Description, &lead.CreatedAt, lead.OwnerID, lead.Status)
+func (r *LeadRepository) Create(lead *models.Leads) error {
+	query := `
+		INSERT INTO leads (id, title, description, created_at, owner_id, status)
+		VALUES ($1, $2, $3, $4, $5, $6)
+	`
+	_, err := r.db.Exec(query, lead.ID, lead.Title, lead.Description, lead.CreatedAt, lead.OwnerID, lead.Status)
 	return err
 }
+
 func (r *LeadRepository) Update(lead *models.Leads) error {
-	query := `UPDATE leads SET Title=$1, Description=$2, CreatedAt=$3, OwnerID=$4, Status=$5 WHERE ID=$6`
-	_, err := r.db.Exec(query, lead.Title, lead.Description, &lead.CreatedAt, lead.OwnerID, lead.Status, lead.ID)
+	query := `UPDATE leads SET title=$1, description=$2, created_at=$3, owner_id=$4, status=$5 WHERE id=$6`
+	_, err := r.db.Exec(query, lead.Title, lead.Description, lead.CreatedAt, lead.OwnerID, lead.Status, lead.ID)
 	return err
 }
 
@@ -37,4 +42,3 @@ func (r *LeadRepository) Delete(id string) error {
 	_, err := r.db.Exec(query, id)
 	return err
 }
-

@@ -1,26 +1,44 @@
 package handlers
-import(
+
+import (
+	"github.com/gin-gonic/gin"
+	"time"
 	"turcompany/internal/models"
 	"turcompany/internal/services"
-	"github.com/gin-gonic/gin"
 )
 
 type LeadHandler struct {
 	Service *services.LeadService
 }
+
 func NewLeadHandler(service *services.LeadService) *LeadHandler {
 	return &LeadHandler{Service: service}
 }
 func (h *LeadHandler) Create(c *gin.Context) {
 	var lead models.Leads
+
+	// Привязка JSON к модели
 	if err := c.ShouldBindJSON(&lead); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Проверка поля owner_id
+	if lead.OwnerID == 0 {
+		c.JSON(400, gin.H{"error": "owner_id is required and must be an integer"})
+		return
+	}
+
+	// Установка временной метки
+	lead.CreatedAt = time.Now()
+
+	// Сохранение лида в базе
 	if err := h.Service.Create(&lead); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Успешное создание
 	c.Status(201)
 }
 func (h *LeadHandler) Update(c *gin.Context) {
