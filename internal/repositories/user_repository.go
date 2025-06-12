@@ -24,8 +24,8 @@ func NewUserRepository(db *sql.DB) UserRepository {
 
 func (r *userRepository) Create(user *models.User) error {
 	query := `
-		INSERT INTO users (company_name, bin_iin, email, password_hash, role_id, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO users (company_name, bin_iin, email, password_hash, role_id)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id
 	`
 
@@ -40,7 +40,7 @@ func (r *userRepository) Create(user *models.User) error {
 
 func (r *userRepository) GetByID(id int) (*models.User, error) {
 	query := `
-		SELECT id, company_name, bin_iin, email, role_id, created_at, updated_at
+		SELECT id, company_name, bin_iin, email, role_id
 		FROM users
 		WHERE id = $1
 	`
@@ -61,8 +61,8 @@ func (r *userRepository) GetByID(id int) (*models.User, error) {
 func (r *userRepository) Update(user *models.User) error {
 	query := `
 		UPDATE users
-		SET company_name = $1, bin_iin = $2, email = $3, role_id = $4, updated_at = $5
-		WHERE id = $6
+		SET company_name = $1, bin_iin = $2, email = $3, role_id = $4
+		WHERE id = $5
 	`
 	_, err := r.DB.Exec(query,
 		user.CompanyName,
@@ -82,7 +82,7 @@ func (r *userRepository) Delete(id int) error {
 
 func (r *userRepository) List() ([]*models.User, error) {
 	query := `
-		SELECT id, company_name, bin_iin, email, role_id, created_at, updated_at
+		SELECT id, company_name, bin_iin, email, role_id
 		FROM users
 		ORDER BY id
 	`
