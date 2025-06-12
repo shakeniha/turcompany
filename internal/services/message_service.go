@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 	
-	"my-crm-project/models"
-	"my-crm-project/repositories"
+        "turcompany/internal/models"       
+	"turcompany/internal/repositories"
 )
 
 // MessageService определяет интерфейс для сервиса сообщений.
