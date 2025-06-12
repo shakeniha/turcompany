@@ -7,7 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	"turcompany/internal/handlers"
+	"turcompany/internal/models"
+	"turcompany/internal/services"
 
 )
 
