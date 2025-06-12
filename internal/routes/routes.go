@@ -6,7 +6,7 @@ import (
 	"turcompany/internal/handlers"
 )
 
-func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *handlers.RoleHandler) *gin.Engine {
+func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *handlers.RoleHandler, leadHandler *handlers.LeadHandler, dealHandler *handlers.DealHandler) *gin.Engine {
 
 	users := r.Group("/users")
 	{
@@ -25,30 +25,24 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *
 		roles.DELETE("/:id", roleHandler.DeleteRole)
 		roles.GET("/", roleHandler.ListRoles)
 	}
-	//
-	//leadRepo := repositories.NewLeadRepository(db)
-	//leadService := services.NewLeadService(leadRepo)
-	//leadHandler := handlers.NewLeadHandler(leadService)
-	//// Lead routes
-	//leads := r.Group("/leads")
-	//{
-	//	leads.POST("/", leadHandler.Create)
-	//	leads.GET("/:id", leadHandler.GetByID)
-	//	leads.PUT("/:id", leadHandler.Update)
-	//	leads.DELETE("/:id", leadHandler.Delete)
-	//}
-	//
-	//dealRepo := repositories.NewDealRepository(db)
-	//dealService := services.NewDealService(dealRepo)
-	//dealHandler := handlers.NewDealHandler(dealService)
-	////Deal routes
-	//deals := r.Group("/deals")
-	//{
-	//	deals.POST("/", dealHandler.Create)
-	//	deals.GET("/:id", dealHandler.GetByID)
-	//	deals.PUT("/:id", dealHandler.Update)
-	//	deals.DELETE("/:id", dealHandler.Delete)
-	//}
+
+	// Lead routes
+	leads := r.Group("/leads")
+	{
+		leads.POST("/", leadHandler.Create)
+		leads.GET("/:id", leadHandler.GetByID)
+		leads.PUT("/:id", leadHandler.Update)
+		leads.DELETE("/:id", leadHandler.Delete)
+	}
+
+	//Deal routes
+	deals := r.Group("/deals")
+	{
+		deals.POST("/", dealHandler.Create)
+		deals.GET("/:id", dealHandler.GetByID)
+		deals.PUT("/:id", dealHandler.Update)
+		deals.DELETE("/:id", dealHandler.Delete)
+	}
 
 	return r
 }
