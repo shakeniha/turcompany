@@ -7,7 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	"turcompany/internal/handlers"
+	"turcompany/internal/models"
+	"turcompany/internal/services"
+        "github.com/gin-gonic/gin"
 )
 
 // sendMessageRequest определяет DTO для отправки нового сообщения.
