@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"my-crm-project/internal/domain"
+	"turcompany/internal/handlers"
 )
 
 // sendMessageRequest определяет DTO для отправки нового сообщения.
