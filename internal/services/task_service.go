@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"turcompany/internal/models"       // Путь к вашим моделям
-	"turcompany/internal/repositories" // Путь к вашим репозиториям
+	"turcompany/internal/models"       
+	"turcompany/internal/repositories" 
 )
 
 // TaskService определяет интерфейс для сервиса задач.
