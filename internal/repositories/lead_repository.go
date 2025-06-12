@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"fmt"
 	"turcompany/internal/models"
 )
 
@@ -13,11 +14,13 @@ func NewLeadRepository(db *sql.DB) *LeadRepository {
 	return &LeadRepository{db: db}
 }
 func (r *LeadRepository) Create(lead *models.Leads) error {
+
 	query := `
-		INSERT INTO leads (id, title, description, created_at, owner_id, status)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO leads ( title, description, created_at, owner_id, status)
+		VALUES ($1, $2, $3, $4, $5)
 	`
-	_, err := r.db.Exec(query, lead.ID, lead.Title, lead.Description, lead.CreatedAt, lead.OwnerID, lead.Status)
+	res, err := r.db.Exec(query, lead.Title, lead.Description, lead.CreatedAt, lead.OwnerID, lead.Status)
+	fmt.Println(res)
 	return err
 }
 
@@ -27,8 +30,8 @@ func (r *LeadRepository) Update(lead *models.Leads) error {
 	return err
 }
 
-func (r *LeadRepository) GetByID(id string) (*models.Leads, error) {
-	query := `SELECT ID, Title, Description, CreatedAt, OwnerID, Status FROM leads WHERE ID=$1`
+func (r *LeadRepository) GetByID(id int) (*models.Leads, error) {
+	query := `SELECT id, title, description, created_at, owner_id, status FROM leads WHERE id=$1`
 	row := r.db.QueryRow(query, id)
 	lead := &models.Leads{}
 	err := row.Scan(&lead.ID, &lead.Title, &lead.Description, &lead.CreatedAt, &lead.OwnerID, &lead.Status)
@@ -37,7 +40,7 @@ func (r *LeadRepository) GetByID(id string) (*models.Leads, error) {
 	}
 	return lead, nil
 }
-func (r *LeadRepository) Delete(id string) error {
+func (r *LeadRepository) Delete(id int) error {
 	query := `DELETE FROM leads WHERE ID=$1`
 	_, err := r.db.Exec(query, id)
 	return err

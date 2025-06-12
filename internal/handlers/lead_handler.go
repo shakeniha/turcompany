@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"strconv"
 	"time"
 	"turcompany/internal/models"
 	"turcompany/internal/services"
@@ -42,12 +44,13 @@ func (h *LeadHandler) Create(c *gin.Context) {
 	c.Status(201)
 }
 func (h *LeadHandler) Update(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
 	var lead models.Leads
 	if err := c.ShouldBindJSON(&lead); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
+	id, _ := strconv.Atoi(idStr)
 	lead.ID = id
 	if err := h.Service.Update(&lead); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
@@ -56,19 +59,35 @@ func (h *LeadHandler) Update(c *gin.Context) {
 	c.Status(200)
 }
 func (h *LeadHandler) GetByID(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	fmt.Println(idStr)
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid ID format"})
+		return
+	}
+
 	lead, err := h.Service.GetByID(id)
 	if err != nil {
 		c.JSON(404, gin.H{"error": "Lead not found"})
 		return
 	}
+	// Если всё прошло успешно, возвращаем JSON ответ
 	c.JSON(200, lead)
 }
+
 func (h *LeadHandler) Delete(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid ID format"})
+		return
+	}
+
 	if err := h.Service.Delete(id); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	c.Status(204)
+
+	c.Status(204) // No Content
 }
