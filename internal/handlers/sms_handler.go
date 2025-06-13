@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"turcompany/internal/services"
@@ -28,6 +29,7 @@ func (h *SMSHandler) SendSMSHandler(c *gin.Context) {
 	}
 
 	if err := h.Service.SendSMS(input.DocumentID, input.Phone); err != nil {
+		fmt.Printf("❌ Failed to send SMS: %v\n", err) // ← сюда лог
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send SMS"})
 		return
 	}
@@ -44,7 +46,7 @@ func (h *SMSHandler) ResendSMSHandler(c *gin.Context) {
 		return
 	}
 
-	if err := h.Service.ResendSMS(documentID); err != nil {
+	if err := h.Service.ResendSMS(documentID, ""); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to resend SMS"})
 		return
 	}
