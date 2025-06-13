@@ -27,7 +27,8 @@ func Run() {
 
 	userRepo := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
-	userHandler := handlers.NewUserHandler(userService)
+	authService := services.NewAuthService()
+	userHandler := handlers.NewUserHandler(userService, authService)
 
 	roleRepo := repositories.NewRoleRepository(db)
 	roleService := services.NewRoleService(roleRepo)
@@ -40,6 +41,8 @@ func Run() {
 	dealRepo := repositories.NewDealRepository(db)
 	dealService := services.NewDealService(dealRepo)
 	dealHandler := handlers.NewDealHandler(dealService)
+
+	authHandler := handlers.NewAuthHandler(userService, authService)
 
 	documentRepo := repositories.NewDocumentRepository(db)
 	documentService := services.NewDocumentService(documentRepo)
@@ -64,6 +67,7 @@ func Run() {
 		roleHandler,
 		leadHandler,
 		dealHandler,
+		authHandler,
 		documentHandler,
 		taskHandler,
 		messageHandler,

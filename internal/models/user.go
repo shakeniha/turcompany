@@ -8,3 +8,8 @@ type User struct {
 	PasswordHash string `json:"password_hash"`
 	RoleID       int    `json:"role_id"`
 }
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
