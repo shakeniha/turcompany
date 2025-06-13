@@ -12,6 +12,10 @@ type SMS_Service struct {
 	Repo *repositories.SMSConfirmationRepository
 }
 
+func NewSMSService(repo *repositories.SMSConfirmationRepository) *SMS_Service {
+	return &SMS_Service{Repo: repo}
+}
+
 // generateCode создает 6-значный код
 func (s *SMS_Service) generateCode() string {
 	rand.Seed(time.Now().UnixNano())
@@ -34,7 +38,7 @@ func (s *SMS_Service) SendSMS(documentID int64, phone string) error {
 		return err
 	}
 
-	// test в хосте 
+	// test в хосте
 	fmt.Printf("📲 SMS sent to %s: code is %s\n", phone, code)
 	return nil
 }

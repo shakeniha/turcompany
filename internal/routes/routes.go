@@ -6,7 +6,7 @@ import (
 	"turcompany/internal/handlers"
 )
 
-func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *handlers.RoleHandler, leadHandler *handlers.LeadHandler, dealHandler *handlers.DealHandler, documentHandler *handlers.DocumentHandler) *gin.Engine {
+func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *handlers.RoleHandler, leadHandler *handlers.LeadHandler, dealHandler *handlers.DealHandler, documentHandler *handlers.DocumentHandler, smsHandler *handlers.SMSHandler) *gin.Engine {
 
 	users := r.Group("/users")
 	{
@@ -52,9 +52,19 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *
 		documents.DELETE("/:id", documentHandler.DeleteDocument)
 
 		documents.GET("/deal/:dealid", documentHandler.ListDocumentsByDeal)
-		documents.PUT("/verify/:id", documentHandler.VerifyDocument)
-		documents.PUT("/send/:id/:code", documentHandler.SendSMSConfirmation)
-		documents.PUT("/confirm/:id/:code", documentHandler.ConfirmDocument)
+		documents.PUT("/:id/verify", documentHandler.VerifyDocument)
+		documents.POST("/:id/sms/:code", documentHandler.SendSMSConfirmation)
+		documents.POST("/:id/confirm/:code", documentHandler.ConfirmDocument)
+	}
+
+	//SMS routes
+	sms := r.Group("/sms")
+	{
+		sms.POST("/send", smsHandler.SendSMSHandler)
+		sms.POST("/resend", smsHandler.ResendSMSHandler)
+		sms.POST("/confirm", smsHandler.ConfirmSMSHandler)
+		sms.GET("/latest/:document_id", smsHandler.GetLatestSMSHandler)
+		sms.DELETE("/:document_id", smsHandler.DeleteSMSHandler)
 	}
 	return r
 }

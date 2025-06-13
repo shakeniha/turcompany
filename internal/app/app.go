@@ -45,6 +45,10 @@ func Run() {
 	documentService := services.NewDocumentService(documentRepo)
 	documentHandler := handlers.NewDocumentHandler(documentService)
 
+	smsRepo := repositories.NewSMSConfirmationRepository(db)
+	smsService := services.NewSMSService(smsRepo)
+	smsHandler := handlers.NewSMSHandler(smsService)
+
 	router := gin.Default()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -57,6 +61,7 @@ func Run() {
 		leadHandler,
 		dealHandler,
 		documentHandler,
+		smsHandler,
 	)
 
 	listenAddr := fmt.Sprintf(":%d", port)
