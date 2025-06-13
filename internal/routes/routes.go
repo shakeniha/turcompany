@@ -2,15 +2,21 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
+	//"turcompany/internal/middleware"
+
 	//"database/sql"
 	"turcompany/internal/handlers"
 )
 
-func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *handlers.RoleHandler, leadHandler *handlers.LeadHandler, dealHandler *handlers.DealHandler) *gin.Engine {
+func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *handlers.RoleHandler, leadHandler *handlers.LeadHandler, dealHandler *handlers.DealHandler, authHandler *handlers.AuthHandler) *gin.Engine {
+
+	r.POST("/login", authHandler.Login)
+
+	r.POST("/users/", userHandler.CreateUser)
 
 	users := r.Group("/users")
+	// users.Use(middleware.AuthMiddleware())
 	{
-		users.POST("/", userHandler.CreateUser)
 		users.GET("/:id", userHandler.GetUserByID)
 		users.PUT("/:id", userHandler.UpdateUser)
 		users.DELETE("/:id", userHandler.DeleteUser)
@@ -18,6 +24,7 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *
 	}
 
 	roles := r.Group("/roles")
+	// roles.Use(middleware.AuthMiddleware())
 	{
 		roles.POST("/", roleHandler.CreateRole)
 		roles.GET("/:id", roleHandler.GetRoleByID)

@@ -27,7 +27,8 @@ func Run() {
 
 	userRepo := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
-	userHandler := handlers.NewUserHandler(userService)
+	authService := services.NewAuthService()
+	userHandler := handlers.NewUserHandler(userService, authService)
 
 	roleRepo := repositories.NewRoleRepository(db)
 	roleService := services.NewRoleService(roleRepo)
@@ -41,6 +42,8 @@ func Run() {
 	dealService := services.NewDealService(dealRepo)
 	dealHandler := handlers.NewDealHandler(dealService)
 
+	authHandler := handlers.NewAuthHandler(userService, authService)
+
 	router := gin.Default()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -52,6 +55,7 @@ func Run() {
 		roleHandler,
 		leadHandler,
 		dealHandler,
+		authHandler,
 	)
 
 	listenAddr := fmt.Sprintf(":%d", port)
