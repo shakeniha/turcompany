@@ -6,7 +6,7 @@ import (
 	"turcompany/internal/handlers"
 )
 
-func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *handlers.RoleHandler, leadHandler *handlers.LeadHandler, dealHandler *handlers.DealHandler) *gin.Engine {
+func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *handlers.RoleHandler, leadHandler *handlers.LeadHandler, dealHandler *handlers.DealHandler, taskHandler *handlers.TaskHandler, messageHandler *handlers.MessageHandler) *gin.Engine {
 
 	users := r.Group("/users")
 	{
@@ -43,6 +43,20 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *
 		deals.PUT("/:id", dealHandler.Update)
 		deals.DELETE("/:id", dealHandler.Delete)
 	}
+
+	// --- Роуты для Задач (Tasks) ---
+	tasks := r.Group("/tasks")
+	tasks.POST("/", taskHandler.Create)
+	tasks.GET("/", taskHandler.GetAll)
+	tasks.GET("/:id", taskHandler.GetByID)
+	tasks.PUT("/:id", taskHandler.Update)
+	tasks.DELETE("/:id", taskHandler.Delete)
+
+	// --- Роуты для Сообщений (Messages) ---
+	messages := r.Group("/messages")
+	messages.POST("/", messageHandler.Send)
+	messages.GET("/conversations", messageHandler.GetConversations)
+	messages.GET("/history/:partner_id", messageHandler.GetConversationHistory)
 
 	return r
 }
