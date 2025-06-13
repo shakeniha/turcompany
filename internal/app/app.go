@@ -41,6 +41,10 @@ func Run() {
 	dealService := services.NewDealService(dealRepo)
 	dealHandler := handlers.NewDealHandler(dealService)
 
+	documentRepo := repositories.NewDocumentRepository(db)
+	documentService := services.NewDocumentService(documentRepo)
+	documentHandler := handlers.NewDocumentHandler(documentService)
+
 	router := gin.Default()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -52,6 +56,7 @@ func Run() {
 		roleHandler,
 		leadHandler,
 		dealHandler,
+		documentHandler,
 	)
 
 	listenAddr := fmt.Sprintf(":%d", port)
