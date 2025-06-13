@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"database/sql"
-	"fmt"
 	"turcompany/internal/models"
 )
 
@@ -19,8 +18,7 @@ func (r *LeadRepository) Create(lead *models.Leads) error {
 		INSERT INTO leads ( title, description, created_at, owner_id, status)
 		VALUES ($1, $2, $3, $4, $5)
 	`
-	res, err := r.db.Exec(query, lead.Title, lead.Description, lead.CreatedAt, lead.OwnerID, lead.Status)
-	fmt.Println(res)
+	_, err := r.db.Exec(query, lead.Title, lead.Description, lead.CreatedAt, lead.OwnerID, lead.Status)
 	return err
 }
 
