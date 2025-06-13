@@ -11,11 +11,12 @@ import (
 )
 
 type UserHandler struct {
-	service services.UserService
+	service     services.UserService
+	authService services.AuthService
 }
 
-func NewUserHandler(service services.UserService) *UserHandler {
-	return &UserHandler{service: service}
+func NewUserHandler(service services.UserService, authService services.AuthService) *UserHandler {
+	return &UserHandler{service: service, authService: authService}
 }
 
 func (h *UserHandler) CreateUser(c *gin.Context) {
@@ -25,6 +26,13 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	hashedPassword, err := h.authService.HashPassword(user.PasswordHash)
+	if err != nil {
+		log.Println("Password hashing error:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		return
+	}
+	user.PasswordHash = hashedPassword
 	if err := h.service.CreateUser(&user); err != nil {
 		log.Println("Service error:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})

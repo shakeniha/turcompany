@@ -12,6 +12,7 @@ type UserRepository interface {
 	Update(user *models.User) error
 	Delete(id int) error
 	List() ([]*models.User, error)
+	GetByEmail(email string) (*models.User, error)
 }
 
 type userRepository struct {
@@ -61,13 +62,14 @@ func (r *userRepository) GetByID(id int) (*models.User, error) {
 func (r *userRepository) Update(user *models.User) error {
 	query := `
 		UPDATE users
-		SET company_name = $1, bin_iin = $2, email = $3, role_id = $4
-		WHERE id = $5
+		SET company_name = $1, bin_iin = $2, email = $3, password_hash = $4, role_id = $5
+		WHERE id = $6
 	`
 	_, err := r.DB.Exec(query,
 		user.CompanyName,
 		user.BinIin,
 		user.Email,
+		user.PasswordHash,
 		user.RoleID,
 		user.ID,
 	)
@@ -108,4 +110,25 @@ func (r *userRepository) List() ([]*models.User, error) {
 		users = append(users, u)
 	}
 	return users, nil
+}
+
+func (r *userRepository) GetByEmail(email string) (*models.User, error) {
+	query := `
+		SELECT id, company_name, bin_iin, email, password_hash, role_id
+		FROM users
+		WHERE email = $1
+	`
+	user := &models.User{}
+	err := r.DB.QueryRow(query, email).Scan(
+		&user.ID,
+		&user.CompanyName,
+		&user.BinIin,
+		&user.Email,
+		&user.PasswordHash,
+		&user.RoleID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }

@@ -27,7 +27,8 @@ func Run() {
 
 	userRepo := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
-	userHandler := handlers.NewUserHandler(userService)
+	authService := services.NewAuthService()
+	userHandler := handlers.NewUserHandler(userService, authService)
 
 	roleRepo := repositories.NewRoleRepository(db)
 	roleService := services.NewRoleService(roleRepo)
@@ -41,13 +42,19 @@ func Run() {
 	dealService := services.NewDealService(dealRepo)
 	dealHandler := handlers.NewDealHandler(dealService)
 
+	authHandler := handlers.NewAuthHandler(userService, authService)
+
 	documentRepo := repositories.NewDocumentRepository(db)
 	documentService := services.NewDocumentService(documentRepo)
 	documentHandler := handlers.NewDocumentHandler(documentService)
 
-	smsRepo := repositories.NewSMSConfirmationRepository(db)
-	smsService := services.NewSMSService(smsRepo)
-	smsHandler := handlers.NewSMSHandler(smsService)
+	taskRepo := repositories.NewTaskRepository(db)
+	taskService := services.NewTaskService(taskRepo)
+	taskHandler := handlers.NewTaskHandler(taskService)
+
+	messageRepo := repositories.NewMessageRepository(db)
+	messageService := services.NewMessageService(messageRepo)
+	messageHandler := handlers.NewMessageHandler(messageService)
 
 	router := gin.Default()
 	router.Use(gin.Logger())
@@ -60,8 +67,10 @@ func Run() {
 		roleHandler,
 		leadHandler,
 		dealHandler,
+		authHandler,
 		documentHandler,
-		smsHandler,
+		taskHandler,
+		messageHandler,
 	)
 
 	listenAddr := fmt.Sprintf(":%d", port)
