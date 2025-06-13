@@ -56,6 +56,10 @@ func Run() {
 	messageService := services.NewMessageService(messageRepo)
 	messageHandler := handlers.NewMessageHandler(messageService)
 
+	smsRepo := repositories.NewSMSConfirmationRepository(db)
+	smsService := services.NewSMSService(smsRepo)
+	smsHandler := handlers.NewSMSHandler(smsService)
+
 	router := gin.Default()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -71,6 +75,7 @@ func Run() {
 		documentHandler,
 		taskHandler,
 		messageHandler,
+		smsHandler,
 	)
 
 	listenAddr := fmt.Sprintf(":%d", port)

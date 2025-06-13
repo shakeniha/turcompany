@@ -8,7 +8,7 @@ import (
 	"turcompany/internal/handlers"
 )
 
-func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *handlers.RoleHandler, leadHandler *handlers.LeadHandler, dealHandler *handlers.DealHandler, authHandler *handlers.AuthHandler, documentHandler *handlers.DocumentHandler, taskHandler *handlers.TaskHandler, messageHandler *handlers.MessageHandler) *gin.Engine {
+func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *handlers.RoleHandler, leadHandler *handlers.LeadHandler, dealHandler *handlers.DealHandler, authHandler *handlers.AuthHandler, documentHandler *handlers.DocumentHandler, taskHandler *handlers.TaskHandler, messageHandler *handlers.MessageHandler, smsHandler *handlers.SMSHandler) *gin.Engine {
 
 	r.POST("/login", authHandler.Login)
 
@@ -76,6 +76,16 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *
 	messages.POST("/", messageHandler.Send)
 	messages.GET("/conversations", messageHandler.GetConversations)
 	messages.GET("/history/:partner_id", messageHandler.GetConversationHistory)
+
+	//SMS routes
+	sms := r.Group("/sms")
+	{
+		sms.POST("/send", smsHandler.SendSMSHandler)
+		sms.POST("/resend", smsHandler.ResendSMSHandler)
+		sms.POST("/confirm", smsHandler.ConfirmSMSHandler)
+		sms.GET("/latest/:document_id", smsHandler.GetLatestSMSHandler)
+		sms.DELETE("/:document_id", smsHandler.DeleteSMSHandler)
+	}
 
 	return r
 }
