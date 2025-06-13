@@ -18,12 +18,14 @@ func NewSMSService(repo *repositories.SMSConfirmationRepository) *SMS_Service {
 
 // generateCode создает 6-значный код
 func (s *SMS_Service) generateCode() string {
-	rand.Seed(time.Now().UnixNano())
-	return fmt.Sprintf("%06d", rand.Intn(1000000))
+	src := rand.NewSource(time.Now().UnixNano())
+	rnd := rand.New(src)
+	return fmt.Sprintf("%06d", rnd.Intn(1000000))
 }
 
 // SendSMS создает новую запись и отправляет код
 func (s *SMS_Service) SendSMS(documentID int64, phone string) error {
+	fmt.Printf("📨 Sending SMS to phone=%s for documentID=%d\n", phone, documentID)
 	code := s.generateCode()
 	sms := &models.SMSConfirmation{
 		DocumentID:  documentID,
@@ -35,25 +37,36 @@ func (s *SMS_Service) SendSMS(documentID int64, phone string) error {
 	}
 	_, err := s.Repo.Create(sms)
 	if err != nil {
+		fmt.Printf("📛 DB Create error: %v\n", err)
 		return err
 	}
 
-	// test в хосте
+	// Тестовая отправка
 	fmt.Printf("📲 SMS sent to %s: code is %s\n", phone, code)
 	return nil
 }
 
 // ResendSMS повторно отправляет код (если последний не подтвержден и не истёк)
-func (s *SMS_Service) ResendSMS(documentID int64) error {
+// Требует номер телефона, если кода ещё не было
+func (s *SMS_Service) ResendSMS(documentID int64, phone string) error {
 	existing, err := s.Repo.GetLatestByDocumentID(documentID)
 	if err != nil {
 		return err
 	}
-	if existing == nil || existing.Confirmed || s.IsCodeExpired(existing.SentAt) {
+
+	if existing == nil {
+		// Нет предыдущего кода — отправляем новый, телефон обязателен
+		if phone == "" {
+			return fmt.Errorf("номер телефона обязателен при первом отправлении")
+		}
+		return s.SendSMS(documentID, phone)
+	}
+
+	if existing.Confirmed || s.IsCodeExpired(existing.SentAt) {
 		return s.SendSMS(documentID, existing.Phone)
 	}
 
-	// Повторно отправляем тот же код
+	// Повторная отправка существующего кода
 	fmt.Printf("🔁 Resending SMS to %s: code is %s\n", existing.Phone, existing.SMSCode)
 	return nil
 }
