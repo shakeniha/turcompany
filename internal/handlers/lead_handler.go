@@ -91,3 +91,31 @@ func (h *LeadHandler) Delete(c *gin.Context) {
 
 	c.Status(204) // No Content
 }
+
+func (h *LeadHandler) ConvertToDeal(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid ID format"})
+		return
+	}
+
+	var req struct {
+		Amount   string `json:"amount" binding:"required"`
+		Currency string `json:"currency" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Вызов ConvertLeadToDeal из LeadService
+	deal, err := h.Service.ConvertLeadToDeal(id, req.Amount, req.Currency)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(201, deal)
+}

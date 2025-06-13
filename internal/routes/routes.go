@@ -40,6 +40,7 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *
 		leads.GET("/:id", leadHandler.GetByID)
 		leads.PUT("/:id", leadHandler.Update)
 		leads.DELETE("/:id", leadHandler.Delete)
+		leads.PUT("/:id/convert", leadHandler.ConvertToDeal)
 	}
 
 	//Deal routes

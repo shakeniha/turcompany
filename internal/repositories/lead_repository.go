@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"log"
 	"turcompany/internal/models"
 )
 
@@ -10,8 +11,12 @@ type LeadRepository struct {
 }
 
 func NewLeadRepository(db *sql.DB) *LeadRepository {
+	if db == nil {
+		log.Fatalf("Received nil database connection")
+	}
 	return &LeadRepository{db: db}
 }
+
 func (r *LeadRepository) Create(lead *models.Leads) error {
 
 	query := `

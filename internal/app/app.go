@@ -16,50 +16,51 @@ import (
 
 func Run() {
 	cfg := config.LoadConfig()
-	dsn := cfg.Database.DSN
-	port := cfg.Server.Port
 
-	db, err := sql.Open("postgres", dsn)
+	// Настройка подключения к базе данных
+	db, err := sql.Open("postgres", cfg.Database.DSN)
 	if err != nil {
-		log.Fatal("Failed to connect to DB: ", err)
+		log.Fatal("Ошибка подключения к базе данных: ", err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("Ошибка закрытия базы данных: %v", err)
+		}
+	}()
 
-	userRepo := repositories.NewUserRepository(db)
-	userService := services.NewUserService(userRepo)
-	authService := services.NewAuthService()
-	userHandler := handlers.NewUserHandler(userService, authService)
-
+	// Репозитории
 	roleRepo := repositories.NewRoleRepository(db)
-	roleService := services.NewRoleService(roleRepo)
-	roleHandler := handlers.NewRoleHandler(roleService)
-
+	userRepo := repositories.NewUserRepository(db)
 	leadRepo := repositories.NewLeadRepository(db)
-	leadService := services.NewLeadService(leadRepo)
-	leadHandler := handlers.NewLeadHandler(leadService)
-
 	dealRepo := repositories.NewDealRepository(db)
-	dealService := services.NewDealService(dealRepo)
-	dealHandler := handlers.NewDealHandler(dealService)
-
-	authHandler := handlers.NewAuthHandler(userService, authService)
-
 	documentRepo := repositories.NewDocumentRepository(db)
-	documentService := services.NewDocumentService(documentRepo)
-	documentHandler := handlers.NewDocumentHandler(documentService)
-
 	taskRepo := repositories.NewTaskRepository(db)
-	taskService := services.NewTaskService(taskRepo)
-	taskHandler := handlers.NewTaskHandler(taskService)
-
 	messageRepo := repositories.NewMessageRepository(db)
-	messageService := services.NewMessageService(messageRepo)
-	messageHandler := handlers.NewMessageHandler(messageService)
-
 	smsRepo := repositories.NewSMSConfirmationRepository(db)
+
+	// Сервисы
+	authService := services.NewAuthService()
+	roleService := services.NewRoleService(roleRepo)
+	userService := services.NewUserService(userRepo)
+	leadService := services.NewLeadService(leadRepo, dealRepo)
+	dealService := services.NewDealService(dealRepo)
+	documentService := services.NewDocumentService(documentRepo)
+	taskService := services.NewTaskService(taskRepo)
+	messageService := services.NewMessageService(messageRepo)
 	smsService := services.NewSMSService(smsRepo)
+
+	// Обработчики
+	authHandler := handlers.NewAuthHandler(userService, authService)
+	roleHandler := handlers.NewRoleHandler(roleService)
+	userHandler := handlers.NewUserHandler(userService, authService)
+	leadHandler := handlers.NewLeadHandler(leadService)
+	dealHandler := handlers.NewDealHandler(dealService)
+	documentHandler := handlers.NewDocumentHandler(documentService)
+	taskHandler := handlers.NewTaskHandler(taskService)
+	messageHandler := handlers.NewMessageHandler(messageService)
 	smsHandler := handlers.NewSMSHandler(smsService)
 
+	// Настройка маршрутов и middleware
 	router := gin.Default()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -78,10 +79,11 @@ func Run() {
 		smsHandler,
 	)
 
-	listenAddr := fmt.Sprintf(":%d", port)
-	log.Printf("Server started on %s", listenAddr)
+	// Запуск сервера
+	listenAddr := fmt.Sprintf(":%d", cfg.Server.Port)
+	log.Printf("Сервер запущен на %s", listenAddr)
 	if err := router.Run(listenAddr); err != nil {
-		log.Fatal(err)
+		log.Fatal("Ошибка запуска сервера: ", err)
 	}
 }
 
