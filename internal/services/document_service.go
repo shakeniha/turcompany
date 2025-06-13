@@ -12,6 +12,10 @@ type DocumentService struct {
 	smsRepo *repositories.SMSConfirmationRepository
 }
 
+func NewDocumentService(repo *repositories.DocumentRepository) *DocumentService {
+	return &DocumentService{Repo: repo}
+}
+
 func (s *DocumentService) CreateDocument(doc *models.Document) (int64, error) {
 	return s.Repo.Create(doc)
 }
