@@ -6,7 +6,7 @@ import (
 	"turcompany/internal/handlers"
 )
 
-func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *handlers.RoleHandler, leadHandler *handlers.LeadHandler, dealHandler *handlers.DealHandler) *gin.Engine {
+func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *handlers.RoleHandler, leadHandler *handlers.LeadHandler, dealHandler *handlers.DealHandler, documentHandler *handlers.DocumentHandler) *gin.Engine {
 
 	users := r.Group("/users")
 	{
@@ -44,5 +44,17 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, roleHandler *
 		deals.DELETE("/:id", dealHandler.Delete)
 	}
 
+	//Document routes
+	documents := r.Group("/documents")
+	{
+		documents.POST("/", documentHandler.CreateDocument)
+		documents.GET("/:id", documentHandler.GetDocument)
+		documents.DELETE("/:id", documentHandler.DeleteDocument)
+
+		documents.GET("/deal/:dealid", documentHandler.ListDocumentsByDeal)
+		documents.PUT("/verify/:id", documentHandler.VerifyDocument)
+		documents.PUT("/send/:id/:code", documentHandler.SendSMSConfirmation)
+		documents.PUT("/confirm/:id/:code", documentHandler.ConfirmDocument)
+	}
 	return r
 }
