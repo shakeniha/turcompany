@@ -4,7 +4,7 @@
 ## 📂 Project Structure
 
 ```
-clean_mobile_app/
+turcompany/
 ├── cmd/
 │   └── web/
 │       ├── helpers.go         # Utility functions for the web layer
