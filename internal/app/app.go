@@ -40,8 +40,15 @@ func Run() {
 
 	// Сервисы
 	authService := services.NewAuthService()
+	emailService := services.NewEmailService(
+		cfg.Email.SMTPHost,
+		cfg.Email.SMTPPort,
+		cfg.Email.SMTPUser,
+		cfg.Email.SMTPPassword,
+		cfg.Email.FromEmail,
+	)
 	roleService := services.NewRoleService(roleRepo)
-	userService := services.NewUserService(userRepo)
+	userService := services.NewUserService(userRepo, emailService)
 	leadService := services.NewLeadService(leadRepo, dealRepo)
 	dealService := services.NewDealService(dealRepo)
 	documentService := services.NewDocumentService(documentRepo)

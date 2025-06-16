@@ -3,4 +3,11 @@ server:
 
 database:
   driver: "postgres"
-  url: "postgres://postgres:1234@localhost:5432/postgres?sslmode=disable"
+  url: "postgres://postgres:123123@localhost:5432/postgres?sslmode=disable"
+
+email:
+  smtp_host: "smtp.mail.ru"
+  smtp_port: 465
+  smtp_user: "aytzhanovk@internet.ru"
+  smtp_password: "Q1mfUaA5BcuryV4Fo3Gq"
+  from_email: "aytzhanovk@internet.ru"
