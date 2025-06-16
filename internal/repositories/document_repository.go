@@ -17,11 +17,22 @@ func NewDocumentRepository(db *sql.DB) *DocumentRepository {
 func (r *DocumentRepository) Create(doc *models.Document) (int64, error) {
 	query := `INSERT INTO documents (deal_id, doc_type, file_path, status, signed_at)
               VALUES ($1, $2, $3, $4, $5) RETURNING id`
-	err := r.db.QueryRow(query, doc.DealID, doc.DocType, doc.FilePath, doc.Status, doc.SignedAt).Scan(&doc.ID)
+
+	var id int64
+	err := r.db.QueryRow(
+		query,
+		doc.DealID,
+		doc.DocType,
+		doc.FilePath,
+		doc.Status,
+		doc.SignedAt,
+	).Scan(&id)
+
 	if err != nil {
-		return 0, fmt.Errorf("create document: %w", err)
+		return 0, fmt.Errorf("создание документа в БД: %w", err)
 	}
-	return doc.ID, nil
+
+	return id, nil
 }
 
 func (r *DocumentRepository) GetByID(id int64) (*models.Document, error) {
@@ -83,4 +94,15 @@ func (r *DocumentRepository) UpdateStatus(id int64, status string) error {
 		return fmt.Errorf("update status: %w", err)
 	}
 	return nil
+}
+
+// Добавим метод для проверки существования лида
+func (r *DocumentRepository) LeadExists(id int) (bool, error) {
+	var exists bool
+	query := `SELECT EXISTS(SELECT 1 FROM leads WHERE id = $1)`
+	err := r.db.QueryRow(query, id).Scan(&exists)
+	if err != nil {
+		return false, fmt.Errorf("проверка существования лида: %w", err)
+	}
+	return exists, nil
 }

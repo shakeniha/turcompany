@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"strconv"
 	"time"
 	"turcompany/internal/models"
 	"turcompany/internal/repositories"
@@ -10,17 +9,16 @@ import (
 
 type LeadService struct {
 	Repo     *repositories.LeadRepository
-	LeadRepo *repositories.LeadRepository
 	DealRepo *repositories.DealRepository
 }
 
 func NewLeadService(leadRepo *repositories.LeadRepository, dealRepo *repositories.DealRepository) *LeadService {
 	return &LeadService{
 		Repo:     leadRepo,
-		LeadRepo: leadRepo,
 		DealRepo: dealRepo,
 	}
 }
+
 func (s *LeadService) Create(lead *models.Leads) error {
 	if s.Repo == nil {
 		return errors.New("LeadRepository is not initialized")
@@ -30,18 +28,22 @@ func (s *LeadService) Create(lead *models.Leads) error {
 	}
 	return s.Repo.Create(lead)
 }
+
 func (s *LeadService) Update(lead *models.Leads) error {
 	return s.Repo.Update(lead)
 }
+
 func (s *LeadService) GetByID(id int) (*models.Leads, error) {
 	return s.Repo.GetByID(id)
 }
+
 func (s *LeadService) Delete(id int) error {
 	return s.Repo.Delete(id)
 }
 
 func (s *LeadService) ConvertLeadToDeal(leadID int, amount, currency string) (*models.Deals, error) {
-	lead, err := s.LeadRepo.GetByID(leadID)
+	// Получаем лид
+	lead, err := s.Repo.GetByID(leadID)
 	if err != nil {
 		return nil, errors.New("lead not found")
 	}
@@ -50,26 +52,38 @@ func (s *LeadService) ConvertLeadToDeal(leadID int, amount, currency string) (*m
 		return nil, errors.New("lead is not in a convertible status")
 	}
 
-	// Шаг 3: Создать новый объект сделки
+	// Проверяем, не существует ли уже сделка для этого лида
+	existingDeal, err := s.DealRepo.GetByLeadID(leadID)
+	if err != nil {
+		return nil, err
+	}
+	if existingDeal != nil {
+		return nil, errors.New("deal already exists for this lead")
+	}
+
+	// Создаем новую сделку
 	deal := &models.Deals{
-		LeadID:    strconv.Itoa(lead.ID),
+		LeadID:    lead.ID, // Теперь это int, а не string
 		Amount:    amount,
 		Currency:  currency,
 		Status:    "new",
 		CreatedAt: time.Now(),
 	}
 
-	// Шаг 4: Сохранить сделку в базе данных через DealRepository
-	if err := s.DealRepo.Create(deal); err != nil {
+	// Сохраняем сделку и получаем её ID
+	dealID, err := s.DealRepo.Create(deal)
+	if err != nil {
 		return nil, err
 	}
+	deal.ID = int(dealID)
 
-	// Шаг 5: Обновить статус лидов в базе данных
+	// Обновляем статус лида
 	lead.Status = "converted"
-	if err := s.LeadRepo.Update(lead); err != nil {
+	if err := s.Repo.Update(lead); err != nil {
+		// Если не удалось обновить статус лида, можно попробовать откатить создание сделки
+		_ = s.DealRepo.Delete(deal.ID)
 		return nil, err
 	}
 
-	// Вернуть созданную сделку
 	return deal, nil
 }

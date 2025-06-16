@@ -32,7 +32,7 @@ func (h *DealHandler) Create(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.Service.Create(&deal); err != nil {
+	if _, err := h.Service.Create(&deal); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
@@ -52,13 +52,19 @@ func (h *DealHandler) Create(c *gin.Context) {
 // @Router       /deals/{id} [put]
 func (h *DealHandler) Update(c *gin.Context) {
 	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid ID"})
+		return
+	}
+
 	var deal models.Deals
 	if err := c.ShouldBindJSON(&deal); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	id, _ := strconv.Atoi(idStr)
 	deal.ID = id
+
 	if err := h.Service.Update(&deal); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -75,7 +81,13 @@ func (h *DealHandler) Update(c *gin.Context) {
 // @Failure      404  {object}  map[string]string
 // @Router       /deals/{id} [get]
 func (h *DealHandler) GetByID(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid ID"})
+		return
+	}
+
 	deal, err := h.Service.GetByID(id)
 	if err != nil {
 		c.JSON(404, gin.H{"error": "Deal not found"})
@@ -92,7 +104,13 @@ func (h *DealHandler) GetByID(c *gin.Context) {
 // @Failure      500  {object}  map[string]string
 // @Router       /deals/{id} [delete]
 func (h *DealHandler) Delete(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid ID"})
+		return
+	}
+
 	if err := h.Service.Delete(id); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
