@@ -8,6 +8,6 @@ database:
 email:
   smtp_host: "smtp.mail.ru"
   smtp_port: 465
-  smtp_user: "aytzhanovk@internet.ru"
-  smtp_password: "Q1mfUaA5BcuryV4Fo3Gq"
-  from_email: "aytzhanovk@internet.ru"
+  smtp_user: "user@internet.ru"
+  smtp_password: "MdZ19VQzAeXEzlFA4xRN"
+  from_email: "user@internet.ru"
