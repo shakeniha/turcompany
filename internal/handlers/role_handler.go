@@ -18,6 +18,16 @@ func NewRoleHandler(service services.RoleService) *RoleHandler {
 	return &RoleHandler{service: service}
 }
 
+// @Summary      Создать роль
+// @Description  Создает новую роль в системе
+// @Tags         Roles
+// @Accept       json
+// @Produce      json
+// @Param        role  body      models.Role  true  "Данные новой роли"
+// @Success      201   {object}  models.Role
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /roles [post]
 func (h *RoleHandler) CreateRole(c *gin.Context) {
 	var role models.Role
 	if err := c.ShouldBindJSON(&role); err != nil {
@@ -33,6 +43,15 @@ func (h *RoleHandler) CreateRole(c *gin.Context) {
 	c.JSON(http.StatusCreated, role)
 }
 
+// @Summary      Получить роль по ID
+// @Description  Возвращает данные одной роли
+// @Tags         Roles
+// @Produce      json
+// @Param        id   path      int  true  "ID роли"
+// @Success      200  {object}  models.Role
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /roles/{id} [get]
 func (h *RoleHandler) GetRoleByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -48,6 +67,17 @@ func (h *RoleHandler) GetRoleByID(c *gin.Context) {
 	c.JSON(http.StatusOK, role)
 }
 
+// @Summary      Обновить роль
+// @Description  Обновляет данные роли по ID
+// @Tags         Roles
+// @Accept       json
+// @Produce      json
+// @Param        id    path      int           true  "ID роли"
+// @Param        role  body      models.Role   true  "Обновленные данные роли"
+// @Success      200   {object}  models.Role
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /roles/{id} [put]
 func (h *RoleHandler) UpdateRole(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -70,6 +100,14 @@ func (h *RoleHandler) UpdateRole(c *gin.Context) {
 	c.JSON(http.StatusOK, role)
 }
 
+// @Summary      Удалить роль
+// @Description  Удаляет роль по ID
+// @Tags         Roles
+// @Param        id   path  int  true  "ID роли"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /roles/{id} [delete]
 func (h *RoleHandler) DeleteRole(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -84,6 +122,13 @@ func (h *RoleHandler) DeleteRole(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Role deleted"})
 }
 
+// @Summary      Получить список ролей
+// @Description  Возвращает список всех ролей
+// @Tags         Roles
+// @Produce      json
+// @Success      200  {array}   models.Role
+// @Failure      500  {object}  map[string]string
+// @Router       /roles [get]
 func (h *RoleHandler) ListRoles(c *gin.Context) {
 	roles, err := h.service.ListRoles()
 	if err != nil {

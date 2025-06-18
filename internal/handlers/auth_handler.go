@@ -20,6 +20,17 @@ func NewAuthHandler(userService services.UserService, authService services.AuthS
 	return &AuthHandler{userService: userService, authService: authService}
 }
 
+// @Summary      Вход в систему
+// @Description  Аутентифицирует пользователя и возвращает токены доступа
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        login  body      models.LoginRequest  true  "Данные для входа"
+// @Success      200    {object}  map[string]interface{}
+// @Failure      400    {object}  map[string]string
+// @Failure      401    {object}  map[string]string
+// @Failure      500    {object}  map[string]string
+// @Router       /login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req models.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

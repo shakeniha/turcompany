@@ -19,6 +19,16 @@ func NewUserHandler(service services.UserService, authService services.AuthServi
 	return &UserHandler{service: service, authService: authService}
 }
 
+// @Summary      Создать пользователя
+// @Description  Создает нового пользователя в системе
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        user  body      models.User  true  "Данные нового пользователя"
+// @Success      201   {object}  models.User
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /users [post]
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -41,6 +51,15 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, user)
 }
 
+// @Summary      Получить пользователя по ID
+// @Description  Возвращает данные одного пользователя
+// @Tags         Users
+// @Produce      json
+// @Param        id   path      int  true  "ID пользователя"
+// @Success      200  {object}  models.User
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /users/{id} [get]
 func (h *UserHandler) GetUserByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -56,6 +75,17 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// @Summary      Обновить пользователя
+// @Description  Обновляет данные пользователя по ID
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        id    path      int           true  "ID пользователя"
+// @Param        user  body      models.User   true  "Обновленные данные пользователя"
+// @Success      200   {object}  models.User
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /users/{id} [put]
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -78,6 +108,14 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// @Summary      Удалить пользователя
+// @Description  Удаляет пользователя по ID
+// @Tags         Users
+// @Param        id   path  int  true  "ID пользователя"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /users/{id} [delete]
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -92,6 +130,13 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User deleted"})
 }
 
+// @Summary      Получить список пользователей
+// @Description  Возвращает список всех пользователей
+// @Tags         Users
+// @Produce      json
+// @Success      200  {array}   models.User
+// @Failure      500  {object}  map[string]string
+// @Router       /users [get]
 func (h *UserHandler) ListUsers(c *gin.Context) {
 	users, err := h.service.ListUsers()
 	if err != nil {
