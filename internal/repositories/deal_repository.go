@@ -3,7 +3,6 @@ package repositories
 import (
 	"database/sql"
 	"fmt"
-	"strings"
 	"turcompany/internal/models"
 )
 
@@ -128,30 +127,26 @@ func (r *DealRepository) CountDeals() (int, error) {
 	return count, err
 }
 
-// ✔ Фильтрация по статусу и датам
+// FilterDeals фильтрует сделки по статусу, lead_id, дате
 func (r *DealRepository) FilterDeals(status, fromDate, toDate string) ([]models.Deals, error) {
-	query := "SELECT id, lead_id, amount, currency, status, created_at FROM deals"
-	var conditions []string
-	var args []interface{}
-	argIndex := 1
+	query := "SELECT id, lead_id, amount, currency, status, created_at FROM deals WHERE 1=1"
+	args := []interface{}{}
+	i := 1
 
 	if status != "" {
-		conditions = append(conditions, fmt.Sprintf("status = $%d", argIndex))
+		query += fmt.Sprintf(" AND status = $%d", i)
 		args = append(args, status)
-		argIndex++
+		i++
 	}
 	if fromDate != "" {
-		conditions = append(conditions, fmt.Sprintf("created_at >= $%d", argIndex))
+		query += fmt.Sprintf(" AND created_at >= $%d", i)
 		args = append(args, fromDate)
-		argIndex++
+		i++
 	}
 	if toDate != "" {
-		conditions = append(conditions, fmt.Sprintf("created_at <= $%d", argIndex))
+		query += fmt.Sprintf(" AND created_at <= $%d", i)
 		args = append(args, toDate)
-		argIndex++
-	}
-	if len(conditions) > 0 {
-		query += " WHERE " + strings.Join(conditions, " AND ")
+		i++
 	}
 
 	rows, err := r.db.Query(query, args...)
@@ -163,8 +158,7 @@ func (r *DealRepository) FilterDeals(status, fromDate, toDate string) ([]models.
 	var deals []models.Deals
 	for rows.Next() {
 		var deal models.Deals
-		err := rows.Scan(&deal.ID, &deal.LeadID, &deal.Amount, &deal.Currency, &deal.Status, &deal.CreatedAt)
-		if err != nil {
+		if err := rows.Scan(&deal.ID, &deal.LeadID, &deal.Amount, &deal.Currency, &deal.Status, &deal.CreatedAt); err != nil {
 			return nil, err
 		}
 		deals = append(deals, deal)

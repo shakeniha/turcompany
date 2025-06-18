@@ -104,10 +104,9 @@ func SetupRoutes(
 
 	// Маршруты для отчетов
 	reports := r.Group("/reports")
-	{
-		reports.GET("/summary", reportHandler.GetSummary)       // Краткий отчет по лидам и сделкам
-		reports.GET("/deals/filter", reportHandler.FilterDeals) // Фильтрация сделок
-	}
+	reports.GET("/summary", reportHandler.GetSummary)
+	reports.GET("/leads/filter", reportHandler.FilterLeads)
+	reports.GET("/deals/filter", reportHandler.FilterDeals)
 
 	return r
 }

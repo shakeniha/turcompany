@@ -34,9 +34,17 @@ func (s *ReportService) GetSummary() (map[string]int, error) {
 		"totalDeals": totalDeals,
 	}, nil
 }
-func (s *ReportService) FilterDeals(status, fromDate, toDate string) ([]models.Deals, error) {
-	if fromDate == "" && toDate == "" && status == "" {
+
+func (s *ReportService) FilterLeads(status, ownerID string) ([]models.Leads, error) {
+	if status == "" && ownerID == "" {
 		return nil, errors.New("не указаны фильтры")
 	}
-	return s.DealRepo.FilterDeals(status, fromDate, toDate)
+	return s.LeadRepo.FilterLeads(status, ownerID)
+}
+
+func (s *ReportService) FilterDeals(status, from, to string) ([]models.Deals, error) {
+	if status == "" && from == "" && to == "" {
+		return nil, errors.New("не указаны фильтры")
+	}
+	return s.DealRepo.FilterDeals(status, from, to)
 }

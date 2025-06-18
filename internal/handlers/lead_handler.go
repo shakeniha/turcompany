@@ -141,7 +141,7 @@ type ConvertLeadRequest struct {
 // ConvertToDeal godoc
 // @Summary Конвертировать лид в сделку
 // @Description Создает сделку на основе существующего лида
-// @Tags leads
+// @Tags Leads
 // @Accept json
 // @Produce json
 // @Param id path int true "ID лида"
