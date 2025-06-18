@@ -13,7 +13,7 @@ func NewDealService(repo *repositories.DealRepository) *DealService {
 	return &DealService{Repo: repo}
 }
 
-func (s *DealService) Create(deal *models.Deals) error {
+func (s *DealService) Create(deal *models.Deals) (int64, error) {
 	if deal.Status == "" {
 		deal.Status = "new"
 	}
@@ -23,9 +23,9 @@ func (s *DealService) Create(deal *models.Deals) error {
 func (s *DealService) Update(deal *models.Deals) error {
 	return s.Repo.Update(deal)
 }
-func (s *DealService) GetByID(id string) (*models.Deals, error) {
+func (s *DealService) GetByID(id int) (*models.Deals, error) {
 	return s.Repo.GetByID(id)
 }
-func (s *DealService) Delete(id string) error {
+func (s *DealService) Delete(id int) error {
 	return s.Repo.Delete(id)
 }

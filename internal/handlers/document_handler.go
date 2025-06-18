@@ -133,3 +133,29 @@ func (h *DocumentHandler) DeleteDocument(c *gin.Context) {
 
 	c.Status(204)
 }
+
+// Добавляем новый метод
+func (h *DocumentHandler) CreateDocumentFromLead(c *gin.Context) {
+	var request struct {
+		LeadID  int    `json:"lead_id" binding:"required"`
+		DocType string `json:"doc_type" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(400, gin.H{"error": "Неверные параметры запроса: " + err.Error()})
+		return
+	}
+
+	doc, err := h.Service.CreateDocumentFromLead(request.LeadID, request.DocType)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": "Ошибка при создании документа: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(201, gin.H{
+		"message":  "Документ успешно создан",
+		"document": doc,
+	})
+}

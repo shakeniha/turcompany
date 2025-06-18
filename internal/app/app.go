@@ -55,7 +55,7 @@ func Run() {
 	userService := services.NewUserService(userRepo, emailService)
 	leadService := services.NewLeadService(leadRepo, dealRepo)
 	dealService := services.NewDealService(dealRepo)
-	documentService := services.NewDocumentService(documentRepo)
+	documentService := services.NewDocumentService(documentRepo, leadRepo, dealRepo, smsRepo, "placeholder-secret")
 	taskService := services.NewTaskService(taskRepo)
 	messageService := services.NewMessageService(messageRepo)
 	smsService := services.NewSMSService(smsRepo)

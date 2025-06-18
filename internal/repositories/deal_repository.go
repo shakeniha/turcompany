@@ -14,39 +14,121 @@ type DealRepository struct {
 func NewDealRepository(db *sql.DB) *DealRepository {
 	return &DealRepository{db: db}
 }
-func (r *DealRepository) Create(deal *models.Deals) error {
-	query := `INSERT INTO deals (lead_id, amount, currency, status, created_at) 
-	VALUES ($1, $2, $3, $4, $5)`
-	_, err := r.db.Exec(query, deal.LeadID, &deal.Amount, deal.Currency, deal.Status, &deal.CreatedAt)
-	return err
-}
-func (r *DealRepository) Update(deal *models.Deals) error {
-	query := `UPDATE deals SET lead_id=$1, amount=$2, currency=$3, status=$4 WHERE id=$5`
-	_, err := r.db.Exec(query, deal.LeadID, &deal.Amount, deal.Currency, deal.Status, deal.ID)
-	return err
+
+// ✔ Возвращает ID новой сделки
+func (r *DealRepository) Create(deal *models.Deals) (int64, error) {
+	query := `
+        INSERT INTO deals (lead_id, amount, currency, status, created_at) 
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id
+    `
+	var id int64
+	err := r.db.QueryRow(
+		query,
+		deal.LeadID,
+		deal.Amount,
+		deal.Currency,
+		deal.Status,
+		deal.CreatedAt,
+	).Scan(&id)
+	if err != nil {
+		return 0, fmt.Errorf("создание сделки: %w", err)
+	}
+	return id, nil
 }
 
-func (r *DealRepository) GetByID(id string) (*models.Deals, error) {
-	query := `SELECT id, lead_id, amount, currency, status, created_at FROM deals WHERE id=$1`
-	row := r.db.QueryRow(query, id)
+// ✔ Получение сделки по lead_id (нужен для document/lead service)
+func (r *DealRepository) GetByLeadID(leadID int) (*models.Deals, error) {
+	query := `
+        SELECT id, lead_id, amount, currency, status, created_at 
+        FROM deals 
+        WHERE lead_id = $1 
+        ORDER BY created_at DESC 
+        LIMIT 1
+    `
 	deal := &models.Deals{}
-	err := row.Scan(&deal.ID, &deal.LeadID, &deal.Amount, &deal.Currency, &deal.Status, &deal.CreatedAt)
+	err := r.db.QueryRow(query, leadID).Scan(
+		&deal.ID,
+		&deal.LeadID,
+		&deal.Amount,
+		&deal.Currency,
+		&deal.Status,
+		&deal.CreatedAt,
+	)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("получение сделки по lead_id: %w", err)
 	}
 	return deal, nil
 }
-func (r *DealRepository) Delete(id string) error {
-	query := `DELETE FROM deals WHERE id=$1`
-	_, err := r.db.Exec(query, id)
-	return err
+
+// ✔ Обновление
+func (r *DealRepository) Update(deal *models.Deals) error {
+	query := `
+        UPDATE deals 
+        SET lead_id=$1, amount=$2, currency=$3, status=$4 
+        WHERE id=$5
+    `
+	_, err := r.db.Exec(query, deal.LeadID, deal.Amount, deal.Currency, deal.Status, deal.ID)
+	if err != nil {
+		return fmt.Errorf("обновление сделки: %w", err)
+	}
+	return nil
 }
+
+// ✔ Поиск по ID (тип int!)
+func (r *DealRepository) GetByID(id int) (*models.Deals, error) {
+	query := `
+        SELECT id, lead_id, amount, currency, status, created_at 
+        FROM deals 
+        WHERE id=$1
+    `
+	deal := &models.Deals{}
+	err := r.db.QueryRow(query, id).Scan(
+		&deal.ID,
+		&deal.LeadID,
+		&deal.Amount,
+		&deal.Currency,
+		&deal.Status,
+		&deal.CreatedAt,
+	)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("получение сделки по id: %w", err)
+	}
+	return deal, nil
+}
+
+// ✔ Удаление по int ID
+func (r *DealRepository) Delete(id int) error {
+	query := `DELETE FROM deals WHERE id=$1`
+	result, err := r.db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("удаление сделки: %w", err)
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("проверка удаления: %w", err)
+	}
+	if affected == 0 {
+		return fmt.Errorf("сделка с id=%d не найдена", id)
+	}
+	return nil
+}
+
+// ✔ Подсчёт сделок
 func (r *DealRepository) CountDeals() (int, error) {
 	var count int
 	query := "SELECT COUNT(*) FROM deals"
 	err := r.db.QueryRow(query).Scan(&count)
 	return count, err
 }
+
+// ✔ Фильтрация по статусу и датам
 func (r *DealRepository) FilterDeals(status, fromDate, toDate string) ([]models.Deals, error) {
 	query := "SELECT id, lead_id, amount, currency, status, created_at FROM deals"
 	var conditions []string
@@ -68,7 +150,6 @@ func (r *DealRepository) FilterDeals(status, fromDate, toDate string) ([]models.
 		args = append(args, toDate)
 		argIndex++
 	}
-
 	if len(conditions) > 0 {
 		query += " WHERE " + strings.Join(conditions, " AND ")
 	}
@@ -88,6 +169,5 @@ func (r *DealRepository) FilterDeals(status, fromDate, toDate string) ([]models.
 		}
 		deals = append(deals, deal)
 	}
-
 	return deals, nil
 }
