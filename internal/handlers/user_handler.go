@@ -145,3 +145,44 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, users)
 }
+
+// @Summary      Получить количество пользователей
+// @Description  Возвращает общее количество пользователей в системе
+// @Tags         Users
+// @Produce      json
+// @Success      200  {object}  map[string]int
+// @Failure      500  {object}  map[string]string
+// @Router       /users/count [get]
+func (h *UserHandler) GetUserCount(c *gin.Context) {
+	count, err := h.service.GetUserCount()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user count"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"count": count})
+}
+
+// @Summary      Получить количество пользователей по роли
+// @Description  Возвращает количество пользователей с указанной ролью
+// @Tags         Users
+// @Produce      json
+// @Param        role_id  path  int  true  "ID роли"
+// @Success      200      {object}  map[string]int
+// @Failure      400      {object}  map[string]string
+// @Failure      500      {object}  map[string]string
+// @Router       /users/count/role/{role_id} [get]
+func (h *UserHandler) GetUserCountByRole(c *gin.Context) {
+	roleIDStr := c.Param("role_id")
+	roleID, err := strconv.Atoi(roleIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid role ID"})
+		return
+	}
+
+	count, err := h.service.GetUserCountByRole(roleID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user count by role"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"count": count, "role_id": roleID})
+}

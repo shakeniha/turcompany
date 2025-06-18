@@ -12,6 +12,8 @@ type UserService interface {
 	DeleteUser(id int) error
 	ListUsers() ([]*models.User, error)
 	GetUserByEmail(email string) (*models.User, error)
+	GetUserCount() (int, error)
+	GetUserCountByRole(roleID int) (int, error)
 }
 
 type userService struct {
@@ -57,4 +59,12 @@ func (s *userService) ListUsers() ([]*models.User, error) {
 
 func (s *userService) GetUserByEmail(email string) (*models.User, error) {
 	return s.repo.GetByEmail(email)
+}
+
+func (s *userService) GetUserCount() (int, error) {
+	return s.repo.GetCount()
+}
+
+func (s *userService) GetUserCountByRole(roleID int) (int, error) {
+	return s.repo.GetCountByRole(roleID)
 }

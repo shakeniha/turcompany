@@ -13,6 +13,8 @@ type UserRepository interface {
 	Delete(id int) error
 	List() ([]*models.User, error)
 	GetByEmail(email string) (*models.User, error)
+	GetCount() (int, error)
+	GetCountByRole(roleID int) (int, error)
 }
 
 type userRepository struct {
@@ -131,4 +133,22 @@ func (r *userRepository) GetByEmail(email string) (*models.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (r *userRepository) GetCount() (int, error) {
+	query := `
+		SELECT COUNT(*) FROM users
+	`
+	var count int
+	err := r.DB.QueryRow(query).Scan(&count)
+	return count, err
+}
+
+func (r *userRepository) GetCountByRole(roleID int) (int, error) {
+	query := `
+		SELECT COUNT(*) FROM users WHERE role_id = $1
+	`
+	var count int
+	err := r.DB.QueryRow(query, roleID).Scan(&count)
+	return count, err
 }
