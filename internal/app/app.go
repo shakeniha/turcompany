@@ -11,7 +11,11 @@ import (
 	"turcompany/internal/services"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // Подключение базы данных PostgreSQL
+
+	swaggerFiles "github.com/swaggo/files" // Импорт файлов для Swagger с alias
+	"github.com/swaggo/gin-swagger"        // Swagger middleware
+	_ "turcompany/docs"                    // Сгенерированная документация Swagger
 )
 
 func Run() {
@@ -56,6 +60,9 @@ func Run() {
 	messageService := services.NewMessageService(messageRepo)
 	smsService := services.NewSMSService(smsRepo)
 
+	// Новый сервис для отчётов
+	reportService := services.NewReportService(leadRepo, dealRepo)
+
 	// Обработчики
 	authHandler := handlers.NewAuthHandler(userService, authService)
 	roleHandler := handlers.NewRoleHandler(roleService)
@@ -66,6 +73,9 @@ func Run() {
 	taskHandler := handlers.NewTaskHandler(taskService)
 	messageHandler := handlers.NewMessageHandler(messageService)
 	smsHandler := handlers.NewSMSHandler(smsService)
+
+	// Новый обработчик для отчётов
+	reportHandler := handlers.NewReportHandler(reportService)
 
 	// Настройка маршрутов и middleware
 	router := gin.Default()
@@ -84,7 +94,11 @@ func Run() {
 		taskHandler,
 		messageHandler,
 		smsHandler,
+		reportHandler, // Передаём reportHandler здесь
 	)
+
+	// Swagger UI
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Запуск сервера
 	listenAddr := fmt.Sprintf(":%d", cfg.Server.Port)

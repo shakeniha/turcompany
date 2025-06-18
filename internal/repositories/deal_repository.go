@@ -2,6 +2,8 @@ package repositories
 
 import (
 	"database/sql"
+	"fmt"
+	"strings"
 	"turcompany/internal/models"
 )
 
@@ -38,4 +40,54 @@ func (r *DealRepository) Delete(id string) error {
 	query := `DELETE FROM deals WHERE id=$1`
 	_, err := r.db.Exec(query, id)
 	return err
+}
+func (r *DealRepository) CountDeals() (int, error) {
+	var count int
+	query := "SELECT COUNT(*) FROM deals"
+	err := r.db.QueryRow(query).Scan(&count)
+	return count, err
+}
+func (r *DealRepository) FilterDeals(status, fromDate, toDate string) ([]models.Deals, error) {
+	query := "SELECT id, lead_id, amount, currency, status, created_at FROM deals"
+	var conditions []string
+	var args []interface{}
+	argIndex := 1
+
+	if status != "" {
+		conditions = append(conditions, fmt.Sprintf("status = $%d", argIndex))
+		args = append(args, status)
+		argIndex++
+	}
+	if fromDate != "" {
+		conditions = append(conditions, fmt.Sprintf("created_at >= $%d", argIndex))
+		args = append(args, fromDate)
+		argIndex++
+	}
+	if toDate != "" {
+		conditions = append(conditions, fmt.Sprintf("created_at <= $%d", argIndex))
+		args = append(args, toDate)
+		argIndex++
+	}
+
+	if len(conditions) > 0 {
+		query += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var deals []models.Deals
+	for rows.Next() {
+		var deal models.Deals
+		err := rows.Scan(&deal.ID, &deal.LeadID, &deal.Amount, &deal.Currency, &deal.Status, &deal.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		deals = append(deals, deal)
+	}
+
+	return deals, nil
 }

@@ -16,6 +16,16 @@ func NewDealHandler(service *services.DealService) *DealHandler {
 	return &DealHandler{Service: service}
 }
 
+// @Summary      Создание сделки
+// @Description  Создает новую сделку, связанную с лидом
+// @Tags         Deals
+// @Accept       json
+// @Produce      json
+// @Param        deals  body      models.Deals  true  "Данные сделки"
+// @Success      201   {object}  models.Deals
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /deals [post]
 func (h *DealHandler) Create(c *gin.Context) {
 	var deal models.Deals
 	if err := c.ShouldBindJSON(&deal); err != nil {
@@ -29,6 +39,17 @@ func (h *DealHandler) Create(c *gin.Context) {
 	c.Status(201)
 }
 
+// @Summary      Обновление сделки
+// @Description  Обновляет данные сделки по ее ID.
+// @Tags         Deals
+// @Accept       json
+// @Produce      json
+// @Param        id    path      int           true  "ID сделки"
+// @Param        deal  body      models.Deals  true  "Новые данные сделки"
+// @Success      200   {object}  models.Deals
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /deals/{id} [put]
 func (h *DealHandler) Update(c *gin.Context) {
 	idStr := c.Param("id")
 	var deal models.Deals
@@ -45,6 +66,14 @@ func (h *DealHandler) Update(c *gin.Context) {
 	c.Status(200)
 }
 
+// @Summary      Получить сделку по ID
+// @Description  Возвращает данные одной сделки
+// @Tags         Deals
+// @Produce      json
+// @Param        id   path      int  true  "ID сделки"
+// @Success      200  {object}  models.Deals
+// @Failure      404  {object}  map[string]string
+// @Router       /deals/{id} [get]
 func (h *DealHandler) GetByID(c *gin.Context) {
 	id := c.Param("id")
 	deal, err := h.Service.GetByID(id)
@@ -55,6 +84,13 @@ func (h *DealHandler) GetByID(c *gin.Context) {
 	c.JSON(200, deal)
 }
 
+// @Summary      Удалить сделку
+// @Description  Удаляет сделку по ID
+// @Tags         Deals
+// @Param        id   path  int  true  "ID сделки"
+// @Success      204  "No Content"
+// @Failure      500  {object}  map[string]string
+// @Router       /deals/{id} [delete]
 func (h *DealHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.Service.Delete(id); err != nil {

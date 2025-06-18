@@ -16,6 +16,17 @@ type LeadHandler struct {
 func NewLeadHandler(service *services.LeadService) *LeadHandler {
 	return &LeadHandler{Service: service}
 }
+
+// @Summary      Создать лид
+// @Description  Создает нового клиента (лида)
+// @Tags         Leads
+// @Accept       json
+// @Produce      json
+// @Param        lead  body      models.Leads  true  "Данные нового лида"
+// @Success      201   {object}  models.Leads
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /leads [post]
 func (h *LeadHandler) Create(c *gin.Context) {
 	var lead models.Leads
 
@@ -43,6 +54,17 @@ func (h *LeadHandler) Create(c *gin.Context) {
 	// Успешное создание
 	c.Status(201)
 }
+
+// @Summary      Обновить лид
+// @Description  Обновляет данные лида по ID
+// @Tags         Leads
+// @Accept       json
+// @Produce      json
+// @Param        id    path      int           true  "ID Лида"
+// @Param        lead  body      models.Leads  true  "Обновленные данные"
+// @Success      200   {object}  models.Leads
+// @Failure      400   {object}  map[string]string
+// @Router       /leads/{id} [put]
 func (h *LeadHandler) Update(c *gin.Context) {
 	idStr := c.Param("id")
 	var lead models.Leads
@@ -58,6 +80,16 @@ func (h *LeadHandler) Update(c *gin.Context) {
 	}
 	c.Status(200)
 }
+
+// @Summary      Получить лид по ID
+// @Description  Возвращает данные одного лида
+// @Tags         Leads
+// @Produce      json
+// @Param        id   path      int  true  "ID Лида"
+// @Success      200  {object}  models.Leads
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /leads/{id} [get]
 func (h *LeadHandler) GetByID(c *gin.Context) {
 	idStr := c.Param("id")
 	fmt.Println(idStr)
@@ -76,6 +108,14 @@ func (h *LeadHandler) GetByID(c *gin.Context) {
 	c.JSON(200, lead)
 }
 
+// @Summary      Удалить лида
+// @Description  Удаляет клиента по ID
+// @Tags         Leads
+// @Param        id   path  int  true  "ID Лида"
+// @Success      204  "No Content"
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /leads/{id} [delete]
 func (h *LeadHandler) Delete(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -92,6 +132,24 @@ func (h *LeadHandler) Delete(c *gin.Context) {
 	c.Status(204) // No Content
 }
 
+// ConvertLeadRequest используется только для Swagger
+type ConvertLeadRequest struct {
+	Amount   string `json:"amount" example:"50000"`
+	Currency string `json:"currency" example:"USD"`
+}
+
+// ConvertToDeal godoc
+// @Summary Конвертировать лид в сделку
+// @Description Создает сделку на основе существующего лида
+// @Tags leads
+// @Accept json
+// @Produce json
+// @Param id path int true "ID лида"
+// @Param request body ConvertLeadRequest true "Данные для сделки"
+// @Success 201 {object} models.Deals
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /leads/{id}/convert [put]
 func (h *LeadHandler) ConvertToDeal(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
