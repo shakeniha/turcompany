@@ -11,6 +11,8 @@ type RoleService interface {
 	UpdateRole(role *models.Role) error
 	DeleteRole(id int) error
 	ListRoles() ([]*models.Role, error)
+	GetRoleCount() (int, error)
+	GetRolesWithUserCounts() ([]map[string]interface{}, error)
 }
 
 type roleService struct {
@@ -39,4 +41,12 @@ func (s *roleService) DeleteRole(id int) error {
 
 func (s *roleService) ListRoles() ([]*models.Role, error) {
 	return s.repo.List()
+}
+
+func (s *roleService) GetRoleCount() (int, error) {
+	return s.repo.GetCount()
+}
+
+func (s *roleService) GetRolesWithUserCounts() ([]map[string]interface{}, error) {
+	return s.repo.GetRolesWithUserCounts()
 }

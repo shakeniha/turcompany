@@ -25,21 +25,25 @@ func SetupRoutes(
 	// Маршруты для пользователей
 	users := r.Group("/users")
 	{
-		users.POST("/", userHandler.CreateUser)      // Создание пользователя
-		users.GET("/:id", userHandler.GetUserByID)   // Получение пользователя по ID
-		users.PUT("/:id", userHandler.UpdateUser)    // Обновление пользователя
-		users.DELETE("/:id", userHandler.DeleteUser) // Удаление пользователя
-		users.GET("/", userHandler.ListUsers)        // Список всех пользователей
+		users.POST("/", userHandler.CreateUser)                           // Создание пользователя
+		users.GET("/count", userHandler.GetUserCount)                     // Количество пользователей
+		users.GET("/count/role/:role_id", userHandler.GetUserCountByRole) // Количество пользователей по роли
+		users.GET("/", userHandler.ListUsers)                             // Список всех пользователей
+		users.GET("/:id", userHandler.GetUserByID)                        // Получение пользователя по ID
+		users.PUT("/:id", userHandler.UpdateUser)                         // Обновление пользователя
+		users.DELETE("/:id", userHandler.DeleteUser)                      // Удаление пользователя
 	}
 
 	// Маршруты для ролей
 	roles := r.Group("/roles")
 	{
-		roles.POST("/", roleHandler.CreateRole)      // Создание роли
-		roles.GET("/:id", roleHandler.GetRoleByID)   // Получение роли по ID
-		roles.PUT("/:id", roleHandler.UpdateRole)    // Обновление роли
-		roles.DELETE("/:id", roleHandler.DeleteRole) // Удаление роли
-		roles.GET("/", roleHandler.ListRoles)        // Список всех ролей
+		roles.POST("/", roleHandler.CreateRole)                            // Создание роли
+		roles.GET("/count", roleHandler.GetRoleCount)                      // Количество ролей
+		roles.GET("/with-user-counts", roleHandler.GetRolesWithUserCounts) // Роли с количеством пользователей
+		roles.GET("/", roleHandler.ListRoles)                              // Список всех ролей
+		roles.GET("/:id", roleHandler.GetRoleByID)                         // Получение роли по ID
+		roles.PUT("/:id", roleHandler.UpdateRole)                          // Обновление роли
+		roles.DELETE("/:id", roleHandler.DeleteRole)                       // Удаление роли
 	}
 
 	// Маршруты для лидов

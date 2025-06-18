@@ -137,3 +137,35 @@ func (h *RoleHandler) ListRoles(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, roles)
 }
+
+// @Summary      Получить количество ролей
+// @Description  Возвращает общее количество ролей в системе
+// @Tags         Roles
+// @Produce      json
+// @Success      200  {object}  map[string]int
+// @Failure      500  {object}  map[string]string
+// @Router       /roles/count [get]
+func (h *RoleHandler) GetRoleCount(c *gin.Context) {
+	count, err := h.service.GetRoleCount()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get role count"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"count": count})
+}
+
+// @Summary      Получить роли с количеством пользователей
+// @Description  Возвращает список ролей с количеством пользователей для каждой роли
+// @Tags         Roles
+// @Produce      json
+// @Success      200  {array}   object
+// @Failure      500  {object}  map[string]string
+// @Router       /roles/with-user-counts [get]
+func (h *RoleHandler) GetRolesWithUserCounts(c *gin.Context) {
+	rolesWithCounts, err := h.service.GetRolesWithUserCounts()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get roles with user counts"})
+		return
+	}
+	c.JSON(http.StatusOK, rolesWithCounts)
+}
