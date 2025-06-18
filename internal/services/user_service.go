@@ -15,15 +15,28 @@ type UserService interface {
 }
 
 type userService struct {
-	repo repositories.UserRepository
+	repo         repositories.UserRepository
+	emailService EmailService
 }
 
-func NewUserService(repo repositories.UserRepository) UserService {
-	return &userService{repo: repo}
+func NewUserService(repo repositories.UserRepository, emailService EmailService) UserService {
+	return &userService{
+		repo:         repo,
+		emailService: emailService,
+	}
 }
 
 func (s *userService) CreateUser(user *models.User) error {
-	return s.repo.Create(user)
+	if err := s.repo.Create(user); err != nil {
+		return err
+	}
+
+	if err := s.emailService.SendWelcomeEmail(user.Email, user.CompanyName); err != nil {
+		// might add proper logging
+		return nil
+	}
+
+	return nil
 }
 
 func (s *userService) GetUserByID(id int) (*models.User, error) {

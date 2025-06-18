@@ -48,3 +48,9 @@ func (r *LeadRepository) Delete(id int) error {
 	_, err := r.db.Exec(query, id)
 	return err
 }
+func (r *LeadRepository) CountLeads() (int, error) {
+	var count int
+	query := "SELECT COUNT(*) FROM leads"
+	err := r.db.QueryRow(query).Scan(&count)
+	return count, err
+}

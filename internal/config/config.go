@@ -12,6 +12,13 @@ type Config struct {
 	Database struct {
 		DSN string `yaml:"url"`
 	} `yaml:"database"`
+	Email struct {
+		SMTPHost     string `yaml:"smtp_host"`
+		SMTPPort     int    `yaml:"smtp_port"`
+		SMTPUser     string `yaml:"smtp_user"`
+		SMTPPassword string `yaml:"smtp_password"`
+		FromEmail    string `yaml:"from_email"`
+	} `yaml:"email"`
 }
 
 func LoadConfig() *Config {
