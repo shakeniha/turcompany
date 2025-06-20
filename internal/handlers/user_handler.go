@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
@@ -32,19 +31,10 @@ func NewUserHandler(service services.UserService, authService services.AuthServi
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		log.Println("Bind error:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	hashedPassword, err := h.authService.HashPassword(user.PasswordHash)
-	if err != nil {
-		log.Println("Password hashing error:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
-		return
-	}
-	user.PasswordHash = hashedPassword
 	if err := h.service.CreateUser(&user); err != nil {
-		log.Println("Service error:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}

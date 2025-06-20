@@ -19,22 +19,29 @@ type UserService interface {
 type userService struct {
 	repo         repositories.UserRepository
 	emailService EmailService
+	authService  AuthService
 }
 
-func NewUserService(repo repositories.UserRepository, emailService EmailService) UserService {
+func NewUserService(repo repositories.UserRepository, emailService EmailService, authService AuthService) UserService {
 	return &userService{
 		repo:         repo,
 		emailService: emailService,
+		authService:  authService,
 	}
 }
 
 func (s *userService) CreateUser(user *models.User) error {
+	hashedPassword, err := s.authService.HashPassword(user.PasswordHash)
+	if err != nil {
+		return err
+	}
+	user.PasswordHash = hashedPassword
+
 	if err := s.repo.Create(user); err != nil {
 		return err
 	}
 
 	if err := s.emailService.SendWelcomeEmail(user.Email, user.CompanyName); err != nil {
-		// might add proper logging
 		return nil
 	}
 

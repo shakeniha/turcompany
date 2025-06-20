@@ -52,7 +52,7 @@ func Run() {
 		cfg.Email.FromEmail,
 	)
 	roleService := services.NewRoleService(roleRepo)
-	userService := services.NewUserService(userRepo, emailService)
+	userService := services.NewUserService(userRepo, emailService, authService)
 	leadService := services.NewLeadService(leadRepo, dealRepo)
 	dealService := services.NewDealService(dealRepo)
 	documentService := services.NewDocumentService(documentRepo, leadRepo, dealRepo, smsRepo, "placeholder-secret")
