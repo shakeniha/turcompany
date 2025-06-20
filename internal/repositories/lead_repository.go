@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"turcompany/internal/models"
 )
@@ -53,4 +54,36 @@ func (r *LeadRepository) CountLeads() (int, error) {
 	query := "SELECT COUNT(*) FROM leads"
 	err := r.db.QueryRow(query).Scan(&count)
 	return count, err
+}
+func (r *LeadRepository) FilterLeads(status string, ownerID string) ([]models.Leads, error) {
+	query := "SELECT id, title, description, created_at, owner_id, status FROM leads WHERE 1=1"
+	args := []interface{}{}
+	i := 1
+
+	if status != "" {
+		query += fmt.Sprintf(" AND status = $%d", i)
+		args = append(args, status)
+		i++
+	}
+
+	if ownerID != "" {
+		query += fmt.Sprintf(" AND owner_id = $%d", i)
+		args = append(args, ownerID)
+	}
+
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var leads []models.Leads
+	for rows.Next() {
+		var lead models.Leads
+		if err := rows.Scan(&lead.ID, &lead.Title, &lead.Description, &lead.CreatedAt, &lead.OwnerID, &lead.Status); err != nil {
+			return nil, err
+		}
+		leads = append(leads, lead)
+	}
+	return leads, nil
 }
