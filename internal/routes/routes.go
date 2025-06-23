@@ -54,6 +54,7 @@ func SetupRoutes(
 		leads.PUT("/:id", leadHandler.Update)                // Обновление лида
 		leads.DELETE("/:id", leadHandler.Delete)             // Удаление лида
 		leads.PUT("/:id/convert", leadHandler.ConvertToDeal) // Конвертация в сделку
+		leads.GET("/", leadHandler.List)
 	}
 
 	// Маршруты для сделок
@@ -63,6 +64,7 @@ func SetupRoutes(
 		deals.GET("/:id", dealHandler.GetByID)   // Получение сделки по ID
 		deals.PUT("/:id", dealHandler.Update)    // Обновление сделки
 		deals.DELETE("/:id", dealHandler.Delete) // Удаление сделки
+		deals.GET("/", dealHandler.List)
 	}
 
 	// Маршруты для документов

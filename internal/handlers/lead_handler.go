@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"net/http"
 	"strconv"
 	"time"
 	"turcompany/internal/models"
@@ -176,4 +177,21 @@ func (h *LeadHandler) ConvertToDeal(c *gin.Context) {
 	}
 
 	c.JSON(201, deal)
+}
+
+// List Leads
+// @Summary      Get all leads
+// @Description  Returns a list of all leads
+// @Tags         Leads
+// @Produce      json
+// @Success      200  {array}  models.Leads
+// @Failure      500  {object}  map[string]string
+// @Router       /leads/ [get]
+func (h *LeadHandler) List(c *gin.Context) {
+	leads, err := h.Service.List()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list leads"})
+		return
+	}
+	c.JSON(http.StatusOK, leads)
 }

@@ -28,10 +28,11 @@ func (s *LeadService) Create(lead *models.Leads) error {
 	}
 	return s.Repo.Create(lead)
 }
-
 func (s *LeadService) Update(lead *models.Leads) error {
 	return s.Repo.Update(lead)
 }
+
+func (s *LeadService) List() ([]*models.Leads, error) { return s.Repo.List() }
 
 func (s *LeadService) GetByID(id int) (*models.Leads, error) {
 	return s.Repo.GetByID(id)

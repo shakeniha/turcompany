@@ -165,3 +165,21 @@ func (r *DealRepository) FilterDeals(status, fromDate, toDate string) ([]models.
 	}
 	return deals, nil
 }
+func (r *DealRepository) List() ([]*models.Deals, error) {
+	query := `SELECT id, lead_id, amount, currency, status, created_at FROM deals`
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var deals []*models.Deals
+	for rows.Next() {
+		var deal models.Deals
+		if err := rows.Scan(&deal.ID, &deal.LeadID, &deal.Amount, &deal.Currency, &deal.Status, &deal.CreatedAt); err != nil {
+			return nil, err
+		}
+		deals = append(deals, &deal)
+	}
+	return deals, nil
+}
