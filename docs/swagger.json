@@ -70,6 +70,38 @@
                 }
             }
         },
+        "/deals/": {
+            "get": {
+                "description": "Returns a list of all deals",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Deals"
+                ],
+                "summary": "Get all deals",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Deals"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/deals/{id}": {
             "get": {
                 "description": "Возвращает данные одной сделки",
@@ -654,6 +686,38 @@
                 }
             }
         },
+        "/leads/": {
+            "get": {
+                "description": "Returns a list of all leads",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Leads"
+                ],
+                "summary": "Get all leads",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Leads"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/leads/{id}": {
             "get": {
                 "description": "Возвращает данные одного лида",
@@ -798,7 +862,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "leads"
+                    "Leads"
                 ],
                 "summary": "Конвертировать лид в сделку",
                 "parameters": [
@@ -911,41 +975,96 @@
         },
         "/reports/deals/filter": {
             "get": {
-                "description": "Фильтрация сделок по указанным параметрам (например, статус, дата).",
+                "description": "Фильтрует сделки по статусу и дате.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Reports"
                 ],
-                "summary": "Фильтр сделок",
+                "summary": "Фильтрация сделок",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Статус сделки",
+                        "description": "Статус",
                         "name": "status",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Начало диапазона дат (yyyy-mm-dd)",
+                        "description": "Дата с (yyyy-mm-dd)",
                         "name": "from",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Конец диапазона дат (yyyy-mm-dd)",
+                        "description": "Дата по (yyyy-mm-dd)",
                         "name": "to",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Список сделок",
+                        "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/models.Deals"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reports/leads/filter": {
+            "get": {
+                "description": "Фильтрует лиды по статусу и owner_id.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Фильтрация лидов",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Статус",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID владельца",
+                        "name": "owner_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Leads"
                             }
                         }
                     },
@@ -982,7 +1101,7 @@
                 "summary": "Сводный отчет",
                 "responses": {
                     "200": {
-                        "description": "Количество лидов и сделок",
+                        "description": "OK",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1069,6 +1188,70 @@
                             "type": "object",
                             "additionalProperties": {
                                 "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/roles/count": {
+            "get": {
+                "description": "Возвращает общее количество ролей в системе",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Получить количество ролей",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/roles/with-user-counts": {
+            "get": {
+                "description": "Возвращает список ролей с количеством пользователей для каждой роли",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Получить роли с количеством пользователей",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object"
                             }
                         }
                     },
@@ -1513,6 +1696,239 @@
                 }
             }
         },
+        "/tasks": {
+            "get": {
+                "description": "Получить список всех задач (с фильтрацией по assignee_id)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get all tasks",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Assignee ID",
+                        "name": "assignee_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Task"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Создает новую задачу",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Create a new task",
+                "parameters": [
+                    {
+                        "description": "Task info (assignee_id, title, description, due_date in RFC3339)",
+                        "name": "task",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Task"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/{id}": {
+            "get": {
+                "description": "Получить задачу по ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get task by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Task"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Обновить задачу по ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Update task",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated task data",
+                        "name": "task",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Task"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Task"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удалить задачу по ID",
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Delete task",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "Возвращает список всех пользователей",
@@ -1572,6 +1988,88 @@
                         "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/models.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/count": {
+            "get": {
+                "description": "Возвращает общее количество пользователей в системе",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Получить количество пользователей",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/count/role/{role_id}": {
+            "get": {
+                "description": "Возвращает количество пользователей с указанной ролью",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Получить количество пользователей по роли",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID роли",
+                        "name": "role_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
                         }
                     },
                     "400": {
@@ -1878,6 +2376,60 @@
                     "type": "string"
                 }
             }
+        },
+        "models.Task": {
+            "type": "object",
+            "properties": {
+                "assignee_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "creator_id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "due_date": {
+                    "description": "Use pointer to allow null",
+                    "type": "string"
+                },
+                "entity_id": {
+                    "type": "integer"
+                },
+                "entity_type": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/models.TaskStatus"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.TaskStatus": {
+            "type": "string",
+            "enum": [
+                "new",
+                "in_progress",
+                "done",
+                "cancelled"
+            ],
+            "x-enum-varnames": [
+                "StatusNew",
+                "StatusInProgress",
+                "StatusDone",
+                "StatusCancelled"
+            ]
         },
         "models.User": {
             "type": "object",

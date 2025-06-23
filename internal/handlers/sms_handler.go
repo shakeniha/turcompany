@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"turcompany/internal/models"
 	"turcompany/internal/services"
 
 	"github.com/gin-gonic/gin"
@@ -14,10 +15,11 @@ type SMSHandler struct {
 }
 
 func NewSMSHandler(service *services.SMS_Service) *SMSHandler {
+	_ = models.SMSConfirmation{}
 	return &SMSHandler{Service: service}
 }
 
-// SendSMSHandler — обработчик для отправки SMS
+// SendSMSHandler — отправка SMS
 // @Summary      Отправить SMS
 // @Description  Отправляет SMS с кодом подтверждения на указанный номер
 // @Tags         SMS
@@ -40,14 +42,14 @@ func (h *SMSHandler) SendSMSHandler(c *gin.Context) {
 
 	if err := h.Service.SendSMS(input.DocumentID, input.Phone); err != nil {
 		fmt.Printf("❌ Failed to send SMS: %v\n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send SMS"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "SMS sent"})
 }
 
-// ResendSMSHandler — повторная отправка
+// ResendSMSHandler — повторная отправка SMS
 // @Summary      Повторная отправка SMS
 // @Description  Повторно отправляет SMS по ID документа
 // @Tags         SMS
@@ -107,7 +109,7 @@ func (h *SMSHandler) ConfirmSMSHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Code confirmed"})
 }
 
-// GetLatestSMSHandler — получить последнее SMS-подтверждение
+// GetLatestSMSHandler — получить последнее SMS
 // @Summary      Получить последнее SMS
 // @Description  Возвращает последнее SMS по документу
 // @Tags         SMS
@@ -139,7 +141,7 @@ func (h *SMSHandler) GetLatestSMSHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, sms)
 }
 
-// DeleteSMSHandler — удалить подтверждения по документу
+// DeleteSMSHandler — удалить подтверждения
 // @Summary      Удалить SMS-подтверждения
 // @Description  Удаляет все SMS-подтверждения по документу
 // @Tags         SMS
