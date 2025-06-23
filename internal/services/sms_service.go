@@ -6,27 +6,33 @@ import (
 	"time"
 	"turcompany/internal/models"
 	"turcompany/internal/repositories"
+	"turcompany/internal/utils"
 )
 
 type SMS_Service struct {
-	Repo *repositories.SMSConfirmationRepository
+	Repo   *repositories.SMSConfirmationRepository
+	Client *utils.Client
 }
 
-func NewSMSService(repo *repositories.SMSConfirmationRepository) *SMS_Service {
-	return &SMS_Service{Repo: repo}
+func NewSMSService(repo *repositories.SMSConfirmationRepository, client *utils.Client) *SMS_Service {
+	return &SMS_Service{Repo: repo, Client: client}
 }
 
-// generateCode создает 6-значный код
 func (s *SMS_Service) generateCode() string {
 	src := rand.NewSource(time.Now().UnixNano())
 	rnd := rand.New(src)
 	return fmt.Sprintf("%06d", rnd.Intn(1000000))
 }
 
-// SendSMS создает новую запись и отправляет код
 func (s *SMS_Service) SendSMS(documentID int64, phone string) error {
-	fmt.Printf("📨 Sending SMS to phone=%s for documentID=%d\n", phone, documentID)
 	code := s.generateCode()
+	text := fmt.Sprintf("Код подтверждения: %s", code)
+
+	resp, err := s.Client.SendSMS(phone, text)
+	if err != nil {
+		return fmt.Errorf("mobizon error: %w", err)
+	}
+
 	sms := &models.SMSConfirmation{
 		DocumentID:  documentID,
 		Phone:       phone,
@@ -35,19 +41,17 @@ func (s *SMS_Service) SendSMS(documentID int64, phone string) error {
 		Confirmed:   false,
 		ConfirmedAt: time.Time{},
 	}
-	_, err := s.Repo.Create(sms)
+
+	fmt.Printf("📦 Inserting SMS: doc_id=%d phone=%s code=%s\n", documentID, phone, code)
+	_, err = s.Repo.Create(sms)
 	if err != nil {
-		fmt.Printf("📛 DB Create error: %v\n", err)
-		return err
+		return fmt.Errorf("db error after SMS: %w", err)
 	}
 
-	// Тестовая отправка
-	fmt.Printf("📲 SMS sent to %s: code is %s\n", phone, code)
+	fmt.Printf("✅ SMS sent to %s with code %s [MobizonMessageID: %s]\n", phone, code, resp.Data.MessageID)
 	return nil
 }
 
-// ResendSMS повторно отправляет код (если последний не подтвержден и не истёк)
-// Требует номер телефона, если кода ещё не было
 func (s *SMS_Service) ResendSMS(documentID int64, phone string) error {
 	existing, err := s.Repo.GetLatestByDocumentID(documentID)
 	if err != nil {
@@ -55,7 +59,6 @@ func (s *SMS_Service) ResendSMS(documentID int64, phone string) error {
 	}
 
 	if existing == nil {
-		// Нет предыдущего кода — отправляем новый, телефон обязателен
 		if phone == "" {
 			return fmt.Errorf("номер телефона обязателен при первом отправлении")
 		}
@@ -66,21 +69,22 @@ func (s *SMS_Service) ResendSMS(documentID int64, phone string) error {
 		return s.SendSMS(documentID, existing.Phone)
 	}
 
-	// Повторная отправка существующего кода
-	fmt.Printf("🔁 Resending SMS to %s: code is %s\n", existing.Phone, existing.SMSCode)
+	text := fmt.Sprintf("Код подтверждения: %s", existing.SMSCode)
+	_, err = s.Client.SendSMS(existing.Phone, text)
+	if err != nil {
+		return fmt.Errorf("resend error: %w", err)
+	}
+
+	fmt.Printf("🔁 Resent SMS to %s with existing code %s\n", existing.Phone, existing.SMSCode)
 	return nil
 }
 
-// ConfirmCode проверяет, совпадает ли код
 func (s *SMS_Service) ConfirmCode(documentID int64, code string) (bool, error) {
 	sms, err := s.Repo.GetByDocumentIDAndCode(documentID, code)
 	if err != nil {
 		return false, err
 	}
-	if sms == nil || sms.Confirmed {
-		return false, nil
-	}
-	if s.IsCodeExpired(sms.SentAt) {
+	if sms == nil || sms.Confirmed || s.IsCodeExpired(sms.SentAt) {
 		return false, nil
 	}
 
@@ -89,18 +93,14 @@ func (s *SMS_Service) ConfirmCode(documentID int64, code string) (bool, error) {
 	return true, s.Repo.Update(sms)
 }
 
-// IsCodeExpired проверяет, истёк ли срок действия кода (5 минут)
 func (s *SMS_Service) IsCodeExpired(sentAt time.Time) bool {
-	expiration := sentAt.Add(5 * time.Minute)
-	return time.Now().After(expiration)
+	return time.Now().After(sentAt.Add(5 * time.Minute))
 }
 
-// DeleteConfirmation удаляет все подтверждения по документу
 func (s *SMS_Service) DeleteConfirmation(documentID int64) error {
 	return s.Repo.DeleteByDocumentID(documentID)
 }
 
-// GetLatestByDocumentID возвращает последнее подтверждение
 func (s *SMS_Service) GetLatestByDocumentID(documentID int64) (*models.SMSConfirmation, error) {
 	return s.Repo.GetLatestByDocumentID(documentID)
 }

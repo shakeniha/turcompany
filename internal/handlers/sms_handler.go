@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"turcompany/internal/models"
 	"turcompany/internal/services"
 
 	"github.com/gin-gonic/gin"
@@ -14,10 +15,21 @@ type SMSHandler struct {
 }
 
 func NewSMSHandler(service *services.SMS_Service) *SMSHandler {
+	_ = models.SMSConfirmation{}
 	return &SMSHandler{Service: service}
 }
 
-// SendSMSHandler — обработчик для отправки SMS
+// SendSMSHandler — отправка SMS
+// @Summary      Отправить SMS
+// @Description  Отправляет SMS с кодом подтверждения на указанный номер
+// @Tags         SMS
+// @Accept       json
+// @Produce      json
+// @Param        input  body  object{document_id=int64,phone=string}  true  "Данные для отправки SMS"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /sms/send [post]
 func (h *SMSHandler) SendSMSHandler(c *gin.Context) {
 	var input struct {
 		DocumentID int64  `json:"document_id"`
@@ -29,15 +41,24 @@ func (h *SMSHandler) SendSMSHandler(c *gin.Context) {
 	}
 
 	if err := h.Service.SendSMS(input.DocumentID, input.Phone); err != nil {
-		fmt.Printf("❌ Failed to send SMS: %v\n", err) // ← сюда лог
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send SMS"})
+		fmt.Printf("❌ Failed to send SMS: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "SMS sent"})
 }
 
-// ResendSMSHandler — повторная отправка
+// ResendSMSHandler — повторная отправка SMS
+// @Summary      Повторная отправка SMS
+// @Description  Повторно отправляет SMS по ID документа
+// @Tags         SMS
+// @Produce      json
+// @Param        document_id  query  int64  true  "ID документа"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /sms/resend [get]
 func (h *SMSHandler) ResendSMSHandler(c *gin.Context) {
 	documentIDStr := c.Query("document_id")
 	documentID, err := strconv.ParseInt(documentIDStr, 10, 64)
@@ -55,6 +76,16 @@ func (h *SMSHandler) ResendSMSHandler(c *gin.Context) {
 }
 
 // ConfirmSMSHandler — подтверждение кода
+// @Summary      Подтвердить SMS-код
+// @Description  Подтверждает введённый код по ID документа
+// @Tags         SMS
+// @Accept       json
+// @Produce      json
+// @Param        input  body  object{document_id=int64,code=string}  true  "ID документа и код подтверждения"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /sms/confirm [post]
 func (h *SMSHandler) ConfirmSMSHandler(c *gin.Context) {
 	var input struct {
 		DocumentID int64  `json:"document_id"`
@@ -78,7 +109,17 @@ func (h *SMSHandler) ConfirmSMSHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Code confirmed"})
 }
 
-// GetLatestSMSHandler — получить последнее SMS-подтверждение
+// GetLatestSMSHandler — получить последнее SMS
+// @Summary      Получить последнее SMS
+// @Description  Возвращает последнее SMS по документу
+// @Tags         SMS
+// @Produce      json
+// @Param        document_id  path  int64  true  "ID документа"
+// @Success      200  {object}  models.SMSConfirmation
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /sms/{document_id} [get]
 func (h *SMSHandler) GetLatestSMSHandler(c *gin.Context) {
 	documentIDStr := c.Param("document_id")
 	documentID, err := strconv.ParseInt(documentIDStr, 10, 64)
@@ -100,7 +141,16 @@ func (h *SMSHandler) GetLatestSMSHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, sms)
 }
 
-// DeleteSMSHandler — удалить подтверждения по документу
+// DeleteSMSHandler — удалить подтверждения
+// @Summary      Удалить SMS-подтверждения
+// @Description  Удаляет все SMS-подтверждения по документу
+// @Tags         SMS
+// @Produce      json
+// @Param        document_id  path  int64  true  "ID документа"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /sms/{document_id} [delete]
 func (h *SMSHandler) DeleteSMSHandler(c *gin.Context) {
 	documentIDStr := c.Param("document_id")
 	documentID, err := strconv.ParseInt(documentIDStr, 10, 64)

@@ -16,15 +16,15 @@ func NewDocumentHandler(service *services.DocumentService) *DocumentHandler {
 	return &DocumentHandler{Service: service}
 }
 
-// @Summary      Create a new document
+// @Summary      Создание документа
 // @Description  Создает новый документ
-// @Tags         documents
+// @Tags         Documents
 // @Accept       json
 // @Produce      json
-// @Param        document  body      models.Document  true  "Document object"
-// @Success      201       {object}  map[string]interface{}
-// @Failure      400       {object}  map[string]string
-// @Failure      500       {object}  map[string]string
+// @Param        document  body      models.Document  true  "Данные документа"
+// @Success      201  {object}  map[string]int64
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
 // @Router       /documents [post]
 func (h *DocumentHandler) CreateDocument(c *gin.Context) {
 	var document models.Document
@@ -43,12 +43,11 @@ func (h *DocumentHandler) CreateDocument(c *gin.Context) {
 	c.JSON(201, gin.H{"id": id})
 }
 
-// @Summary      Get document by ID
-// @Description  Получить документ по ID
-// @Tags         documents
-// @Accept       json
+// @Summary      Получить документ по ID
+// @Description  Возвращает один документ по его ID
+// @Tags         Documents
 // @Produce      json
-// @Param        id   path      int  true  "Document ID"
+// @Param        id   path      int64  true  "ID документа"
 // @Success      200  {object}  models.Document
 // @Failure      400  {object}  map[string]string
 // @Failure      404  {object}  map[string]string
@@ -72,14 +71,14 @@ func (h *DocumentHandler) GetDocument(c *gin.Context) {
 	c.JSON(200, doc)
 }
 
-// @Summary      Verify document
-// @Description  Подтвердить документ
-// @Tags         documents
-// @Param        id   path      int  true  "Document ID"
+// @Summary      Верифицировать документ
+// @Description  Отмечает документ как верифицированный
+// @Tags         Documents
+// @Param        id   path  int64  true  "ID документа"
 // @Success      202  {object}  map[string]string
 // @Failure      400  {object}  map[string]string
 // @Failure      404  {object}  map[string]string
-// @Router       /documents/{id}/verify [put]
+// @Router       /documents/{id}/verify [patch]
 func (h *DocumentHandler) VerifyDocument(c *gin.Context) {
 	idparam := c.Param("id")
 	id, err := strconv.ParseInt(idparam, 10, 64)
@@ -94,14 +93,14 @@ func (h *DocumentHandler) VerifyDocument(c *gin.Context) {
 	c.JSON(202, gin.H{"message": "verified"})
 }
 
-// @Summary      Send SMS confirmation
-// @Description  Отправить код подтверждения по SMS
-// @Tags         documents
-// @Param        id    path      int     true  "Document ID"
-// @Param        code  path      string  true  "Confirmation Code"
-// @Success      200   {object}  map[string]string
-// @Failure      400   {object}  map[string]string
-// @Failure      500   {object}  map[string]string
+// @Summary      Отправка SMS подтверждения
+// @Description  Отправляет код подтверждения на номер, связанный с документом
+// @Tags         Documents
+// @Param        id    path  int64  true  "ID документа"
+// @Param        code  path  string  true  "Код подтверждения"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
 // @Router       /documents/{id}/sms/{code} [post]
 func (h *DocumentHandler) SendSMSConfirmation(c *gin.Context) {
 	code := c.Param("code")
@@ -120,14 +119,14 @@ func (h *DocumentHandler) SendSMSConfirmation(c *gin.Context) {
 	c.JSON(200, gin.H{"sms": "sms confirmed"})
 }
 
-// @Summary      Confirm document by code
-// @Description  Подтверждение документа по коду
-// @Tags         documents
-// @Param        id    path      int     true  "Document ID"
-// @Param        code  path      string  true  "Confirmation Code"
-// @Success      200   {object}  map[string]string
-// @Failure      400   {object}  map[string]string
-// @Failure      404   {object}  map[string]string
+// @Summary      Подтвердить документ
+// @Description  Подтверждает документ по SMS-коду
+// @Tags         Documents
+// @Param        id    path  int64   true  "ID документа"
+// @Param        code  path  string  true  "Код подтверждения"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
 // @Router       /documents/{id}/confirm/{code} [post]
 func (h *DocumentHandler) ConfirmDocument(c *gin.Context) {
 	idParam := c.Param("id")
@@ -147,13 +146,14 @@ func (h *DocumentHandler) ConfirmDocument(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "document signed"})
 }
 
-// @Summary      List documents by deal ID
-// @Description  Получить список документов по ID сделки
-// @Tags         documents
-// @Param        dealid  path      int  true  "Deal ID"
-// @Success      200     {array}   models.Document
-// @Failure      400     {object}  map[string]string
-// @Failure      500     {object}  map[string]string
+// @Summary      Получить документы сделки
+// @Description  Возвращает все документы, связанные с определенной сделкой
+// @Tags         Documents
+// @Produce      json
+// @Param        dealid  path  int64  true  "ID сделки"
+// @Success      200  {array}   models.Document
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
 // @Router       /documents/deal/{dealid} [get]
 func (h *DocumentHandler) ListDocumentsByDeal(c *gin.Context) {
 	dealIDParam := c.Param("dealid")
@@ -172,10 +172,10 @@ func (h *DocumentHandler) ListDocumentsByDeal(c *gin.Context) {
 	c.JSON(200, docs)
 }
 
-// @Summary      Delete a document
-// @Description  Удалить документ по ID
-// @Tags         documents
-// @Param        id   path  int  true  "Document ID"
+// @Summary      Удалить документ
+// @Description  Удаляет документ по ID
+// @Tags         Documents
+// @Param        id   path  int64  true  "ID документа"
 // @Success      204  "No Content"
 // @Failure      400  {object}  map[string]string
 // @Failure      500  {object}  map[string]string
@@ -196,15 +196,15 @@ func (h *DocumentHandler) DeleteDocument(c *gin.Context) {
 	c.Status(204)
 }
 
-// @Summary      Create document from lead
-// @Description  Создать документ по лиду
-// @Tags         documents
+// @Summary      Создание документа из лида
+// @Description  Создает документ на основе лида и типа документа
+// @Tags         Documents
 // @Accept       json
 // @Produce      json
-// @Param        data  body  map[string]interface{}  true  "Lead ID and Document Type"
-// @Success      201   {object}  map[string]interface{}
-// @Failure      400   {object}  map[string]string
-// @Failure      500   {object}  map[string]string
+// @Param        input  body  object{lead_id=int,doc_type=string}  true  "ID лида и тип документа"
+// @Success      201  {object}  map[string]interface{}
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
 // @Router       /documents/from-lead [post]
 func (h *DocumentHandler) CreateDocumentFromLead(c *gin.Context) {
 	var request struct {
