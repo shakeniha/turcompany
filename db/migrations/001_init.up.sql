@@ -75,5 +75,6 @@ CREATE TABLE IF NOT EXISTS sms_confirmations (
     sms_code VARCHAR(100),
     sent_at TIMESTAMPTZ,
     confirmed BOOLEAN DEFAULT FALSE,
-    confirmed_at TIMESTAMPTZ
+    confirmed_at TIMESTAMPTZ,
+    phone VARCHAR(20)
 );
