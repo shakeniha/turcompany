@@ -87,3 +87,21 @@ func (r *LeadRepository) FilterLeads(status string, ownerID string) ([]models.Le
 	}
 	return leads, nil
 }
+func (r *LeadRepository) List() ([]*models.Leads, error) {
+	query := `SELECT id, title, description, created_at, owner_id, status FROM leads`
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var leads []*models.Leads
+	for rows.Next() {
+		var lead models.Leads
+		if err := rows.Scan(&lead.ID, &lead.Title, &lead.Description, &lead.CreatedAt, &lead.OwnerID, &lead.Status); err != nil {
+			return nil, err
+		}
+		leads = append(leads, &lead)
+	}
+	return leads, nil
+}

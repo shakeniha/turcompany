@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"net/http"
 	"strconv"
 	"turcompany/internal/models"
 	"turcompany/internal/services"
@@ -116,4 +117,21 @@ func (h *DealHandler) Delete(c *gin.Context) {
 		return
 	}
 	c.Status(204)
+}
+
+// List Deals
+// @Summary      Get all deals
+// @Description  Returns a list of all deals
+// @Tags         Deals
+// @Produce      json
+// @Success      200  {array}  models.Deals
+// @Failure 500  {object}  map[string]string
+// @Router       /deals/ [get]
+func (h *DealHandler) List(c *gin.Context) {
+	deals, err := h.Service.List()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve deals"})
+		return
+	}
+	c.JSON(http.StatusOK, deals)
 }

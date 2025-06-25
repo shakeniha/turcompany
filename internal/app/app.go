@@ -9,6 +9,7 @@ import (
 	"turcompany/internal/repositories"
 	"turcompany/internal/routes"
 	"turcompany/internal/services"
+	"turcompany/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq" // Подключение базы данных PostgreSQL
@@ -58,7 +59,8 @@ func Run() {
 	documentService := services.NewDocumentService(documentRepo, leadRepo, dealRepo, smsRepo, "placeholder-secret")
 	taskService := services.NewTaskService(taskRepo)
 	messageService := services.NewMessageService(messageRepo)
-	smsService := services.NewSMSService(smsRepo)
+	mobizonClient := utils.NewClient("kzfaad0a91a4b498db593b78414dfdaa2c213b8b8996afa325a223543481efeb11dd11")
+	smsService := services.NewSMSService(smsRepo, mobizonClient)
 
 	// Новый сервис для отчётов
 	reportService := services.NewReportService(leadRepo, dealRepo)

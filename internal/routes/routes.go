@@ -57,6 +57,7 @@ func SetupRoutes(
 		leads.PUT("/:id", leadHandler.Update)                // Обновление лида
 		leads.DELETE("/:id", leadHandler.Delete)             // Удаление лида
 		leads.PUT("/:id/convert", leadHandler.ConvertToDeal) // Конвертация в сделку
+		leads.GET("/", leadHandler.List)
 	}
 
 	// Маршруты для сделок
@@ -66,15 +67,21 @@ func SetupRoutes(
 		deals.GET("/:id", dealHandler.GetByID)   // Получение сделки по ID
 		deals.PUT("/:id", dealHandler.Update)    // Обновление сделки
 		deals.DELETE("/:id", dealHandler.Delete) // Удаление сделки
+		deals.GET("/", dealHandler.List)
 	}
 
 	// Маршруты для документов
 	documents := r.Group("/documents")
 	{
-		documents.POST("/", documentHandler.CreateDocument)                 // Создание документа
-		documents.GET("/:id", documentHandler.GetDocument)                  // Получение документа по ID
-		documents.DELETE("/:id", documentHandler.DeleteDocument)            // Удаление документа
-		documents.GET("/deal/:dealid", documentHandler.ListDocumentsByDeal) // Документы по сделке
+		documents.POST("/", documentHandler.CreateDocument)
+		documents.GET("/:id", documentHandler.GetDocument)
+		documents.DELETE("/:id", documentHandler.DeleteDocument)
+
+		documents.GET("/deal/:dealid", documentHandler.ListDocumentsByDeal)
+		documents.PUT("/verify/:id", documentHandler.VerifyDocument)
+		documents.PUT("/send/:id/:code", documentHandler.SendSMSConfirmation)
+		documents.PUT("/confirm/:id/:code", documentHandler.ConfirmDocument)
+		documents.POST("/create-from-lead", documentHandler.CreateDocumentFromLead)
 	}
 
 	// Маршруты для задач
