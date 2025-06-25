@@ -47,7 +47,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	//15 minutes
+	// Access Token создается на 15 минут
 	accessClaims := &middleware.Claims{
 		UserID: user.ID,
 		RoleID: user.RoleID,
@@ -62,7 +62,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	//30 days
+	// Refresh Token создается на 30 дней
 	refreshClaims := &middleware.Claims{
 		UserID: user.ID,
 		RoleID: user.RoleID,
