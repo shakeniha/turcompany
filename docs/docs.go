@@ -76,6 +76,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/deals/": {
+            "get": {
+                "description": "Returns a list of all deals",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Deals"
+                ],
+                "summary": "Get all deals",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Deals"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/deals/{id}": {
             "get": {
                 "description": "Возвращает данные одной сделки",
@@ -211,12 +243,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "documents"
+                    "Documents"
                 ],
-                "summary": "Create a new document",
+                "summary": "Создание документа",
                 "parameters": [
                     {
-                        "description": "Document object",
+                        "description": "Данные документа",
                         "name": "document",
                         "in": "body",
                         "required": true,
@@ -230,7 +262,9 @@ const docTemplate = `{
                         "description": "Created",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
                         }
                     },
                     "400": {
@@ -256,15 +290,18 @@ const docTemplate = `{
         },
         "/documents/deal/{dealid}": {
             "get": {
-                "description": "Получить список документов по ID сделки",
-                "tags": [
-                    "documents"
+                "description": "Возвращает все документы, связанные с определенной сделкой",
+                "produces": [
+                    "application/json"
                 ],
-                "summary": "List documents by deal ID",
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Получить документы сделки",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Deal ID",
+                        "description": "ID сделки",
                         "name": "dealid",
                         "in": "path",
                         "required": true
@@ -303,7 +340,7 @@ const docTemplate = `{
         },
         "/documents/from-lead": {
             "post": {
-                "description": "Создать документ по лиду",
+                "description": "Создает документ на основе лида и типа документа",
                 "consumes": [
                     "application/json"
                 ],
@@ -311,18 +348,25 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "documents"
+                    "Documents"
                 ],
-                "summary": "Create document from lead",
+                "summary": "Создание документа из лида",
                 "parameters": [
                     {
-                        "description": "Lead ID and Document Type",
-                        "name": "data",
+                        "description": "ID лида и тип документа",
+                        "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "properties": {
+                                "doc_type": {
+                                    "type": "string"
+                                },
+                                "lead_id": {
+                                    "type": "integer"
+                                }
+                            }
                         }
                     }
                 ],
@@ -357,21 +401,18 @@ const docTemplate = `{
         },
         "/documents/{id}": {
             "get": {
-                "description": "Получить документ по ID",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Возвращает один документ по его ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "documents"
+                    "Documents"
                 ],
-                "summary": "Get document by ID",
+                "summary": "Получить документ по ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Document ID",
+                        "description": "ID документа",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -405,15 +446,15 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Удалить документ по ID",
+                "description": "Удаляет документ по ID",
                 "tags": [
-                    "documents"
+                    "Documents"
                 ],
-                "summary": "Delete a document",
+                "summary": "Удалить документ",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Document ID",
+                        "description": "ID документа",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -434,161 +475,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/documents/{id}/confirm/{code}": {
-            "post": {
-                "description": "Подтверждение документа по коду",
-                "tags": [
-                    "documents"
-                ],
-                "summary": "Confirm document by code",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Document ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Confirmation Code",
-                        "name": "code",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/documents/{id}/sms/{code}": {
-            "post": {
-                "description": "Отправить код подтверждения по SMS",
-                "tags": [
-                    "documents"
-                ],
-                "summary": "Send SMS confirmation",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Document ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Confirmation Code",
-                        "name": "code",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/documents/{id}/verify": {
-            "put": {
-                "description": "Подтвердить документ",
-                "tags": [
-                    "documents"
-                ],
-                "summary": "Verify document",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Document ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "202": {
-                        "description": "Accepted",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -636,6 +522,38 @@ const docTemplate = `{
                             "type": "object",
                             "additionalProperties": {
                                 "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/leads/": {
+            "get": {
+                "description": "Returns a list of all leads",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Leads"
+                ],
+                "summary": "Get all leads",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Leads"
                             }
                         }
                     },
@@ -1401,6 +1319,286 @@ const docTemplate = `{
                 }
             }
         },
+        "/sms/confirm": {
+            "post": {
+                "description": "Подтверждает введённый код по ID документа",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SMS"
+                ],
+                "summary": "Подтвердить SMS-код",
+                "parameters": [
+                    {
+                        "description": "ID документа и код подтверждения",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "string"
+                                },
+                                "document_id": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sms/resend": {
+            "get": {
+                "description": "Повторно отправляет SMS по ID документа",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SMS"
+                ],
+                "summary": "Повторная отправка SMS",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID документа",
+                        "name": "document_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sms/send": {
+            "post": {
+                "description": "Отправляет SMS с кодом подтверждения на указанный номер",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SMS"
+                ],
+                "summary": "Отправить SMS",
+                "parameters": [
+                    {
+                        "description": "Данные для отправки SMS",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "document_id": {
+                                    "type": "integer"
+                                },
+                                "phone": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sms/{document_id}": {
+            "get": {
+                "description": "Возвращает последнее SMS по документу",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SMS"
+                ],
+                "summary": "Получить последнее SMS",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID документа",
+                        "name": "document_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.SMSConfirmation"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет все SMS-подтверждения по документу",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SMS"
+                ],
+                "summary": "Удалить SMS-подтверждения",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID документа",
+                        "name": "document_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/tasks": {
             "get": {
                 "description": "Получить список всех задач (с фильтрацией по assignee_id)",
@@ -2052,6 +2250,32 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SMSConfirmation": {
+            "type": "object",
+            "properties": {
+                "confirmed": {
+                    "type": "boolean"
+                },
+                "confirmed_at": {
+                    "type": "string"
+                },
+                "document_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "sent_at": {
+                    "type": "string"
+                },
+                "sms_code": {
                     "type": "string"
                 }
             }

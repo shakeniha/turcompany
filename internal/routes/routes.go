@@ -76,12 +76,8 @@ func SetupRoutes(
 		documents.POST("/", documentHandler.CreateDocument)
 		documents.GET("/:id", documentHandler.GetDocument)
 		documents.DELETE("/:id", documentHandler.DeleteDocument)
-
-		documents.GET("/deal/:dealid", documentHandler.ListDocumentsByDeal)
-		documents.PUT("/verify/:id", documentHandler.VerifyDocument)
-		documents.PUT("/send/:id/:code", documentHandler.SendSMSConfirmation)
-		documents.PUT("/confirm/:id/:code", documentHandler.ConfirmDocument)
 		documents.POST("/create-from-lead", documentHandler.CreateDocumentFromLead)
+		documents.GET("/deal/:dealid", documentHandler.ListDocumentsByDeal)
 	}
 
 	// Маршруты для задач
