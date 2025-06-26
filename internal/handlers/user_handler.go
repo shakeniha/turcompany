@@ -176,3 +176,27 @@ func (h *UserHandler) GetUserCountByRole(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"count": count, "role_id": roleID})
 }
+
+// @Summary      Регистрация пользователя
+// @Description  Регистрирует нового пользователя (публичный доступ)
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        user  body      models.User  true  "Данные нового пользователя"
+// @Success      201   {object}  models.User
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /register [post]
+func (h *UserHandler) Register(c *gin.Context) {
+	var user models.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	user.RoleID = 2 // Стадартное значение роли для регистрации
+	if err := h.service.CreateUser(&user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
+		return
+	}
+	c.JSON(http.StatusCreated, user)
+}

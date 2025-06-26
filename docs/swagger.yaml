@@ -70,23 +70,6 @@ definitions:
       name:
         type: string
     type: object
-  models.SMSConfirmation:
-    properties:
-      confirmed:
-        type: boolean
-      confirmed_at:
-        type: string
-      document_id:
-        type: integer
-      id:
-        type: integer
-      phone:
-        type: string
-      sent_at:
-        type: string
-      sms_code:
-        type: string
-    type: object
   models.Task:
     properties:
       assignee_id:
@@ -188,27 +171,6 @@ paths:
       summary: Создание сделки
       tags:
       - Deals
-  /deals/:
-    get:
-      description: Returns a list of all deals
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Deals'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get all deals
-      tags:
-      - Deals
   /deals/{id}:
     delete:
       description: Удаляет сделку по ID
@@ -298,7 +260,7 @@ paths:
       - application/json
       description: Создает новый документ
       parameters:
-      - description: Данные документа
+      - description: Document object
         in: body
         name: document
         required: true
@@ -310,8 +272,7 @@ paths:
         "201":
           description: Created
           schema:
-            additionalProperties:
-              type: integer
+            additionalProperties: true
             type: object
         "400":
           description: Bad Request
@@ -325,14 +286,14 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Создание документа
+      summary: Create a new document
       tags:
-      - Documents
+      - documents
   /documents/{id}:
     delete:
-      description: Удаляет документ по ID
+      description: Удалить документ по ID
       parameters:
-      - description: ID документа
+      - description: Document ID
         in: path
         name: id
         required: true
@@ -352,13 +313,15 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Удалить документ
+      summary: Delete a document
       tags:
-      - Documents
+      - documents
     get:
-      description: Возвращает один документ по его ID
+      consumes:
+      - application/json
+      description: Получить документ по ID
       parameters:
-      - description: ID документа
+      - description: Document ID
         in: path
         name: id
         required: true
@@ -382,19 +345,19 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Получить документ по ID
+      summary: Get document by ID
       tags:
-      - Documents
+      - documents
   /documents/{id}/confirm/{code}:
     post:
-      description: Подтверждает документ по SMS-коду
+      description: Подтверждение документа по коду
       parameters:
-      - description: ID документа
+      - description: Document ID
         in: path
         name: id
         required: true
         type: integer
-      - description: Код подтверждения
+      - description: Confirmation Code
         in: path
         name: code
         required: true
@@ -418,19 +381,19 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Подтвердить документ
+      summary: Confirm document by code
       tags:
-      - Documents
+      - documents
   /documents/{id}/sms/{code}:
     post:
-      description: Отправляет код подтверждения на номер, связанный с документом
+      description: Отправить код подтверждения по SMS
       parameters:
-      - description: ID документа
+      - description: Document ID
         in: path
         name: id
         required: true
         type: integer
-      - description: Код подтверждения
+      - description: Confirmation Code
         in: path
         name: code
         required: true
@@ -454,14 +417,14 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Отправка SMS подтверждения
+      summary: Send SMS confirmation
       tags:
-      - Documents
+      - documents
   /documents/{id}/verify:
-    patch:
-      description: Отмечает документ как верифицированный
+    put:
+      description: Подтвердить документ
       parameters:
-      - description: ID документа
+      - description: Document ID
         in: path
         name: id
         required: true
@@ -485,20 +448,18 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Верифицировать документ
+      summary: Verify document
       tags:
-      - Documents
+      - documents
   /documents/deal/{dealid}:
     get:
-      description: Возвращает все документы, связанные с определенной сделкой
+      description: Получить список документов по ID сделки
       parameters:
-      - description: ID сделки
+      - description: Deal ID
         in: path
         name: dealid
         required: true
         type: integer
-      produces:
-      - application/json
       responses:
         "200":
           description: OK
@@ -518,25 +479,21 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Получить документы сделки
+      summary: List documents by deal ID
       tags:
-      - Documents
+      - documents
   /documents/from-lead:
     post:
       consumes:
       - application/json
-      description: Создает документ на основе лида и типа документа
+      description: Создать документ по лиду
       parameters:
-      - description: ID лида и тип документа
+      - description: Lead ID and Document Type
         in: body
-        name: input
+        name: data
         required: true
         schema:
-          properties:
-            doc_type:
-              type: string
-            lead_id:
-              type: integer
+          additionalProperties: true
           type: object
       produces:
       - application/json
@@ -558,9 +515,9 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Создание документа из лида
+      summary: Create document from lead
       tags:
-      - Documents
+      - documents
   /leads:
     post:
       consumes:
@@ -593,27 +550,6 @@ paths:
               type: string
             type: object
       summary: Создать лид
-      tags:
-      - Leads
-  /leads/:
-    get:
-      description: Returns a list of all leads
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Leads'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get all leads
       tags:
       - Leads
   /leads/{id}:
@@ -783,6 +719,40 @@ paths:
               type: string
             type: object
       summary: Вход в систему
+      tags:
+      - Auth
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Регистрирует нового пользователя (публичный доступ)
+      parameters:
+      - description: Данные нового пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Регистрация пользователя
       tags:
       - Auth
   /reports/deals/filter:
@@ -1078,190 +1048,6 @@ paths:
       summary: Получить роли с количеством пользователей
       tags:
       - Roles
-  /sms/{document_id}:
-    delete:
-      description: Удаляет все SMS-подтверждения по документу
-      parameters:
-      - description: ID документа
-        in: path
-        name: document_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Удалить SMS-подтверждения
-      tags:
-      - SMS
-    get:
-      description: Возвращает последнее SMS по документу
-      parameters:
-      - description: ID документа
-        in: path
-        name: document_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.SMSConfirmation'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Получить последнее SMS
-      tags:
-      - SMS
-  /sms/confirm:
-    post:
-      consumes:
-      - application/json
-      description: Подтверждает введённый код по ID документа
-      parameters:
-      - description: ID документа и код подтверждения
-        in: body
-        name: input
-        required: true
-        schema:
-          properties:
-            code:
-              type: string
-            document_id:
-              type: integer
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Подтвердить SMS-код
-      tags:
-      - SMS
-  /sms/resend:
-    get:
-      description: Повторно отправляет SMS по ID документа
-      parameters:
-      - description: ID документа
-        in: query
-        name: document_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Повторная отправка SMS
-      tags:
-      - SMS
-  /sms/send:
-    post:
-      consumes:
-      - application/json
-      description: Отправляет SMS с кодом подтверждения на указанный номер
-      parameters:
-      - description: Данные для отправки SMS
-        in: body
-        name: input
-        required: true
-        schema:
-          properties:
-            document_id:
-              type: integer
-            phone:
-              type: string
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Отправить SMS
-      tags:
-      - SMS
   /tasks:
     get:
       description: Получить список всех задач (с фильтрацией по assignee_id)

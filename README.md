@@ -1,29 +1,34 @@
-# Tour Company
-
+# TurCompany
 
 ## 📂 Project Structure
 
 ```
 turcompany/
 ├── cmd/
+│   ├── bot/
+│   │   └── main.go                # Telegram bot entry point
 │   └── web/
-│       ├── helpers.go         # Utility functions for the web layer
-│       ├── initializer.go     # Application initialization logic
-│       ├── main.go            # Entry point of the application
-│       ├── middleware.go      # HTTP middlewares
-│       └── routes.go          # HTTP route definitions
+│       └── main.go                # Web server entry point
 ├── config/
-│   └── config.yaml            # YAML file for application configuration
+│   └── config.yaml                # Application configuration
 ├── db/
-│   └── migrations/            # Database migration files
+│   └── migrations/                # Database migration files
+├── docs/                          # Swagger and documentation
 ├── internal/
-│   ├── config/
-│   │   └── config.go          # Configuration loading and handling
-│   ├── handlers/              # HTTP request handlers
-│   ├── models/                # Application data models
-│   ├── repositories/          # Data access layer (DB interactions)
-│   └── services/              # Business logic and services
-├── go.mod                     # Go module definition
+│   ├── app/                       # Application bootstrap
+│   ├── config/                    # Config loader
+│   ├── handlers/                  # HTTP request handlers
+│   ├── messaging/                 # Chat bot logic
+│   ├── middleware/                # Gin middlewares
+│   ├── models/                    # Data models
+│   ├── pdf/                       # PDF generation
+│   ├── repositories/              # Data access layer
+│   ├── routes/                    # Route definitions
+│   ├── services/                  # Business logic
+│   └── utils/                     # Utility functions
+├── go.mod                         # Go module definition
+├── go.sum                         # Go dependencies
+└── README.md                      # Project documentation
 ```
 
 ---

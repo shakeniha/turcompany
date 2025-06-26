@@ -22,6 +22,9 @@ func SetupRoutes(
 	// Аутентификация
 	r.POST("/login", authHandler.Login)
 
+	// Публичная регистрация пользователя
+	r.POST("/register", userHandler.Register)
+
 	// Маршруты для пользователей
 	users := r.Group("/users")
 	{
