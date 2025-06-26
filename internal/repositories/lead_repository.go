@@ -55,7 +55,25 @@ func (r *LeadRepository) CountLeads() (int, error) {
 	err := r.db.QueryRow(query).Scan(&count)
 	return count, err
 }
-func (r *LeadRepository) FilterLeads(status string, ownerID string) ([]models.Leads, error) {
+
+// Файл: internal/repositories/lead_repository.go
+func (r *LeadRepository) FilterLeads(status string, ownerID int, sortBy, order string, limit, offset int) ([]models.Leads, error) {
+	if sortBy == "" {
+		sortBy = "created_at"
+	}
+	if order != "asc" && order != "desc" {
+		order = "desc"
+	}
+
+	allowedSortFields := map[string]bool{
+		"created_at": true,
+		"owner_id":   true,
+		"status":     true,
+	}
+	if !allowedSortFields[sortBy] {
+		sortBy = "created_at"
+	}
+
 	query := "SELECT id, title, description, created_at, owner_id, status FROM leads WHERE 1=1"
 	args := []interface{}{}
 	i := 1
@@ -65,11 +83,14 @@ func (r *LeadRepository) FilterLeads(status string, ownerID string) ([]models.Le
 		args = append(args, status)
 		i++
 	}
-
-	if ownerID != "" {
+	if ownerID > 0 {
 		query += fmt.Sprintf(" AND owner_id = $%d", i)
 		args = append(args, ownerID)
+		i++
 	}
+
+	query += fmt.Sprintf(" ORDER BY %s %s LIMIT $%d OFFSET $%d", sortBy, order, i, i+1)
+	args = append(args, limit, offset)
 
 	rows, err := r.db.Query(query, args...)
 	if err != nil {
@@ -87,9 +108,13 @@ func (r *LeadRepository) FilterLeads(status string, ownerID string) ([]models.Le
 	}
 	return leads, nil
 }
-func (r *LeadRepository) List() ([]*models.Leads, error) {
-	query := `SELECT id, title, description, created_at, owner_id, status FROM leads`
-	rows, err := r.db.Query(query)
+
+func (r *LeadRepository) ListPaginated(limit, offset int) ([]*models.Leads, error) {
+	query := `SELECT id, title, description, created_at, owner_id, status 
+	          FROM leads 
+	          ORDER BY created_at DESC 
+	          LIMIT $1 OFFSET $2`
+	rows, err := r.db.Query(query, limit, offset)
 	if err != nil {
 		return nil, err
 	}
