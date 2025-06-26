@@ -124,6 +124,8 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 // @Description  Возвращает список всех пользователей
 // @Tags         Users
 // @Produce      json
+// @Param        page   query     int  false  "Page number"
+// @Param        limit  query     int  false  "Page size"
 // @Success      200  {array}   models.User
 // @Failure      500  {object}  map[string]string
 // @Router       /users [get]

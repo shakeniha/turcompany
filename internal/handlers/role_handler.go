@@ -126,6 +126,8 @@ func (h *RoleHandler) DeleteRole(c *gin.Context) {
 // @Description  Возвращает список всех ролей
 // @Tags         Roles
 // @Produce      json
+// @Param        page   query     int  false  "Page number"
+// @Param        limit  query     int  false  "Page size"
 // @Success      200  {array}   models.Role
 // @Failure      500  {object}  map[string]string
 // @Router       /roles [get]
