@@ -10,7 +10,7 @@ type RoleService interface {
 	GetRoleByID(id int) (*models.Role, error)
 	UpdateRole(role *models.Role) error
 	DeleteRole(id int) error
-	ListRoles() ([]*models.Role, error)
+	ListRoles(limit, offset int) ([]*models.Role, error)
 	GetRoleCount() (int, error)
 	GetRolesWithUserCounts() ([]map[string]interface{}, error)
 }
@@ -39,8 +39,8 @@ func (s *roleService) DeleteRole(id int) error {
 	return s.repo.Delete(id)
 }
 
-func (s *roleService) ListRoles() ([]*models.Role, error) {
-	return s.repo.List()
+func (s *roleService) ListRoles(limit, offset int) ([]*models.Role, error) {
+	return s.repo.List(limit, offset)
 }
 
 func (s *roleService) GetRoleCount() (int, error) {
