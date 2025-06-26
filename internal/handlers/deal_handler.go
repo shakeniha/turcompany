@@ -119,18 +119,36 @@ func (h *DealHandler) Delete(c *gin.Context) {
 	c.Status(204)
 }
 
-// List Deals
-// @Summary      Get all deals
-// @Description  Returns a list of all deals
+// @Summary      Список сделок с пагинацией
+// @Description  Возвращает список сделок с пагинацией
 // @Tags         Deals
 // @Produce      json
+// @Param        page   query     int  false  "Номер страницы (по умолчанию 1)"
+// @Param        size   query     int  false  "Размер страницы (по умолчанию 100)"
 // @Success      200  {array}  models.Deals
-// @Failure 500  {object}  map[string]string
-// @Router       /deals/ [get]
+// @Failure      500  {object}  map[string]string
+// @Router       /deals [get]
 func (h *DealHandler) List(c *gin.Context) {
-	deals, err := h.Service.List()
+	pageStr := c.DefaultQuery("page", "1")
+	sizeStr := c.DefaultQuery("size", "100")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	size, err := strconv.Atoi(sizeStr)
+	if err != nil || size < 1 {
+		size = 100
+	}
+
+	offset := (page - 1) * size
+
+	deals, err := h.Service.ListPaginated(size, offset)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve deals"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to retrieve deals",
+			"debug": err.Error(), // Временное логирование для отладки
+		})
 		return
 	}
 	c.JSON(http.StatusOK, deals)

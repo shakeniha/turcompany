@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"turcompany/internal/models"
 	"turcompany/internal/repositories"
 )
@@ -35,16 +34,20 @@ func (s *ReportService) GetSummary() (map[string]int, error) {
 	}, nil
 }
 
-func (s *ReportService) FilterLeads(status, ownerID string) ([]models.Leads, error) {
-	if status == "" && ownerID == "" {
-		return nil, errors.New("не указаны фильтры")
-	}
-	return s.LeadRepo.FilterLeads(status, ownerID)
+func (s *ReportService) FilterLeads(
+	status string,
+	ownerID int,
+	sortBy, order string,
+	limit, offset int,
+) ([]models.Leads, error) {
+	return s.LeadRepo.FilterLeads(status, ownerID, sortBy, order, limit, offset)
 }
 
-func (s *ReportService) FilterDeals(status, from, to string) ([]models.Deals, error) {
-	if status == "" && from == "" && to == "" {
-		return nil, errors.New("не указаны фильтры")
-	}
-	return s.DealRepo.FilterDeals(status, from, to)
+func (s *ReportService) FilterDeals(
+	status, from, to, currency string,
+	amountMin, amountMax float64,
+	sortBy, order string,
+	limit, offset int,
+) ([]models.Deals, error) {
+	return s.DealRepo.FilterDeals(status, from, to, currency, sortBy, order, amountMin, amountMax, limit, offset)
 }

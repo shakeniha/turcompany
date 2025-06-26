@@ -127,8 +127,24 @@ func (r *DealRepository) CountDeals() (int, error) {
 	return count, err
 }
 
-// FilterDeals фильтрует сделки по статусу, lead_id, дате
-func (r *DealRepository) FilterDeals(status, fromDate, toDate string) ([]models.Deals, error) {
+func (r *DealRepository) FilterDeals(status, fromDate, toDate, currency, sortBy, order string, amountMin, amountMax float64, limit, offset int) ([]models.Deals, error) {
+	if sortBy == "" {
+		sortBy = "created_at"
+	}
+	if order != "asc" && order != "desc" {
+		order = "desc"
+	}
+
+	allowedSortFields := map[string]bool{
+		"created_at": true,
+		"amount":     true,
+		"status":     true,
+		"currency":   true,
+	}
+	if !allowedSortFields[sortBy] {
+		sortBy = "created_at"
+	}
+
 	query := "SELECT id, lead_id, amount, currency, status, created_at FROM deals WHERE 1=1"
 	args := []interface{}{}
 	i := 1
@@ -148,6 +164,24 @@ func (r *DealRepository) FilterDeals(status, fromDate, toDate string) ([]models.
 		args = append(args, toDate)
 		i++
 	}
+	if currency != "" {
+		query += fmt.Sprintf(" AND currency = $%d", i)
+		args = append(args, currency)
+		i++
+	}
+	if amountMin > 0 {
+		query += fmt.Sprintf(" AND amount::float >= $%d", i)
+		args = append(args, amountMin)
+		i++
+	}
+	if amountMax > 0 {
+		query += fmt.Sprintf(" AND amount::float <= $%d", i)
+		args = append(args, amountMax)
+		i++
+	}
+
+	query += fmt.Sprintf(" ORDER BY %s %s LIMIT $%d OFFSET $%d", sortBy, order, i, i+1)
+	args = append(args, limit, offset)
 
 	rows, err := r.db.Query(query, args...)
 	if err != nil {
@@ -165,11 +199,16 @@ func (r *DealRepository) FilterDeals(status, fromDate, toDate string) ([]models.
 	}
 	return deals, nil
 }
-func (r *DealRepository) List() ([]*models.Deals, error) {
-	query := `SELECT id, lead_id, amount, currency, status, created_at FROM deals`
-	rows, err := r.db.Query(query)
+
+func (r *DealRepository) ListPaginated(limit, offset int) ([]*models.Deals, error) {
+	query := `SELECT id, lead_id, amount, currency, status, created_at 
+	          FROM deals 
+	          ORDER BY created_at DESC 
+	          LIMIT $1 OFFSET $2`
+
+	rows, err := r.db.Query(query, limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ошибка запроса: %w", err)
 	}
 	defer rows.Close()
 
@@ -177,7 +216,7 @@ func (r *DealRepository) List() ([]*models.Deals, error) {
 	for rows.Next() {
 		var deal models.Deals
 		if err := rows.Scan(&deal.ID, &deal.LeadID, &deal.Amount, &deal.Currency, &deal.Status, &deal.CreatedAt); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("ошибка чтения: %w", err)
 		}
 		deals = append(deals, &deal)
 	}

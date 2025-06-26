@@ -32,7 +32,9 @@ func (s *LeadService) Update(lead *models.Leads) error {
 	return s.Repo.Update(lead)
 }
 
-func (s *LeadService) List() ([]*models.Leads, error) { return s.Repo.List() }
+func (s *LeadService) ListPaginated(limit, offset int) ([]*models.Leads, error) {
+	return s.Repo.ListPaginated(limit, offset)
+}
 
 func (s *LeadService) GetByID(id int) (*models.Leads, error) {
 	return s.Repo.GetByID(id)

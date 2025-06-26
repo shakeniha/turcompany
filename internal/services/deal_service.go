@@ -29,4 +29,6 @@ func (s *DealService) GetByID(id int) (*models.Deals, error) {
 func (s *DealService) Delete(id int) error {
 	return s.Repo.Delete(id)
 }
-func (s *DealService) List() ([]*models.Deals, error) { return s.Repo.List() }
+func (s *DealService) ListPaginated(limit, offset int) ([]*models.Deals, error) {
+	return s.Repo.ListPaginated(limit, offset)
+}

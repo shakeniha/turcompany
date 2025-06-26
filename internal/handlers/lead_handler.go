@@ -179,16 +179,31 @@ func (h *LeadHandler) ConvertToDeal(c *gin.Context) {
 	c.JSON(201, deal)
 }
 
-// List Leads
-// @Summary      Get all leads
-// @Description  Returns a list of all leads
+// @Summary      Get all leads with pagination
+// @Description  Returns a list of all leads with pagination
 // @Tags         Leads
 // @Produce      json
+// @Param        page   query     int  false  "Page number (default 1)"
+// @Param        size   query     int  false  "Page size (default 100)"
 // @Success      200  {array}  models.Leads
 // @Failure      500  {object}  map[string]string
-// @Router       /leads/ [get]
+// @Router       /leads [get]
 func (h *LeadHandler) List(c *gin.Context) {
-	leads, err := h.Service.List()
+	pageStr := c.DefaultQuery("page", "1")
+	sizeStr := c.DefaultQuery("size", "100")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	size, err := strconv.Atoi(sizeStr)
+	if err != nil || size < 1 {
+		size = 100
+	}
+
+	offset := (page - 1) * size
+
+	leads, err := h.Service.ListPaginated(size, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list leads"})
 		return
