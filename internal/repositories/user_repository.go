@@ -11,7 +11,7 @@ type UserRepository interface {
 	GetByID(id int) (*models.User, error)
 	Update(user *models.User) error
 	Delete(id int) error
-	List() ([]*models.User, error)
+	List(limit, offset int) ([]*models.User, error)
 	GetByEmail(email string) (*models.User, error)
 	GetCount() (int, error)
 	GetCountByRole(roleID int) (int, error)
@@ -84,14 +84,14 @@ func (r *userRepository) Delete(id int) error {
 	return err
 }
 
-func (r *userRepository) List() ([]*models.User, error) {
+func (r *userRepository) List(limit, offset int) ([]*models.User, error) {
 	query := `
 		SELECT id, company_name, bin_iin, email, role_id
 		FROM users
 		ORDER BY id
+		LIMIT $1 OFFSET $2
 	`
-
-	rows, err := r.DB.Query(query)
+	rows, err := r.DB.Query(query, limit, offset)
 	if err != nil {
 		return nil, err
 	}

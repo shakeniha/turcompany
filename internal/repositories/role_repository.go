@@ -8,7 +8,7 @@ import (
 type RoleRepository interface {
 	GetByID(id int) (*models.Role, error)
 	GetByName(name string) (*models.Role, error)
-	List() ([]*models.Role, error)
+	List(limit, offset int) ([]*models.Role, error)
 	Create(role *models.Role) error
 	Update(role *models.Role) error
 	Delete(id int) error
@@ -44,9 +44,9 @@ func (r *roleRepository) GetByName(name string) (*models.Role, error) {
 	return role, nil
 }
 
-func (r *roleRepository) List() ([]*models.Role, error) {
-	query := `SELECT id, name, description FROM roles ORDER BY id`
-	rows, err := r.DB.Query(query)
+func (r *roleRepository) List(limit, offset int) ([]*models.Role, error) {
+	query := `SELECT id, name, description FROM roles ORDER BY id LIMIT $1 OFFSET $2`
+	rows, err := r.DB.Query(query, limit, offset)
 	if err != nil {
 		return nil, err
 	}

@@ -130,7 +130,19 @@ func (h *RoleHandler) DeleteRole(c *gin.Context) {
 // @Failure      500  {object}  map[string]string
 // @Router       /roles [get]
 func (h *RoleHandler) ListRoles(c *gin.Context) {
-	roles, err := h.service.ListRoles()
+	pageStr := c.DefaultQuery("page", "1")
+	limitStr := c.DefaultQuery("limit", "10")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit < 1 {
+		limit = 10
+	}
+	offset := (page - 1) * limit
+
+	roles, err := h.service.ListRoles(limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list roles"})
 		return

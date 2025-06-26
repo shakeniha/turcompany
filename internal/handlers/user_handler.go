@@ -128,7 +128,19 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 // @Failure      500  {object}  map[string]string
 // @Router       /users [get]
 func (h *UserHandler) ListUsers(c *gin.Context) {
-	users, err := h.service.ListUsers()
+	pageStr := c.DefaultQuery("page", "1")
+	limitStr := c.DefaultQuery("limit", "10")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit < 1 {
+		limit = 10
+	}
+	offset := (page - 1) * limit
+
+	users, err := h.service.ListUsers(limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list users"})
 		return
