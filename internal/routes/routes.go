@@ -73,6 +73,7 @@ func SetupRoutes(
 	// Маршруты для документов
 	documents := r.Group("/documents")
 	{
+		documents.GET("/", documentHandler.ListDocuments)
 		documents.POST("/", documentHandler.CreateDocument)
 		documents.GET("/:id", documentHandler.GetDocument)
 		documents.DELETE("/:id", documentHandler.DeleteDocument)

@@ -155,3 +155,32 @@ func (h *DocumentHandler) CreateDocumentFromLead(c *gin.Context) {
 		"document": doc,
 	})
 }
+
+// @Summary      Получить список документов
+// @Description  Возвращает список всех документов с пагинацией
+// @Tags         Documents
+// @Produce      json
+// @Param        page  query int false "Номер страницы"
+// @Param        size  query int false "Размер страницы"
+// @Success      200  {array}   models.Document
+// @Failure      500  {object}  map[string]string
+// @Router       /documents [get]
+func (h *DocumentHandler) ListDocuments(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	size, _ := strconv.Atoi(c.DefaultQuery("size", "100"))
+	if page < 1 {
+		page = 1
+	}
+	if size < 1 {
+		size = 100
+	}
+	offset := (page - 1) * size
+
+	docs, err := h.Service.ListDocuments(size, offset)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "could not fetch documents"})
+		return
+	}
+
+	c.JSON(200, docs)
+}

@@ -106,3 +106,26 @@ func (r *DocumentRepository) LeadExists(id int) (bool, error) {
 	}
 	return exists, nil
 }
+func (r *DocumentRepository) ListDocuments(limit, offset int) ([]*models.Document, error) {
+	query := `SELECT id, deal_id, doc_type, file_path, status, signed_at 
+			  FROM documents 
+			  ORDER BY signed_at DESC 
+			  LIMIT $1 OFFSET $2`
+
+	rows, err := r.db.Query(query, limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("list documents: %w", err)
+	}
+	defer rows.Close()
+
+	var docs []*models.Document
+	for rows.Next() {
+		var doc models.Document
+		if err := rows.Scan(&doc.ID, &doc.DealID, &doc.DocType, &doc.FilePath, &doc.Status, &doc.SignedAt); err != nil {
+			return nil, err
+		}
+		docs = append(docs, &doc)
+	}
+
+	return docs, nil
+}

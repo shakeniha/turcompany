@@ -163,3 +163,6 @@ func (s *DocumentService) DeleteDocument(id int64) error {
 
 	return s.Repo.Delete(id)
 }
+func (s *DocumentService) ListDocuments(limit, offset int) ([]*models.Document, error) {
+	return s.Repo.ListDocuments(limit, offset)
+}
